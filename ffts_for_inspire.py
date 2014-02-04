@@ -19,10 +19,13 @@ def get_list():
                 for t in rec.get('037')[0][0]:
                     if 'a' in t:
                         url = ""
-                        try:
-                            url = BibRecDocs(recid).get_bibdoc('main').get_file("pdf;pdfa").url
-                        except:
-                            pass
+                        for f in BibRecDocs(recid).get_bibdoc('main').list_latest_files():
+                            if f.format in ('.pdf', '.pdf;pdfa'):
+                                if url:
+                                    if f.format is ".pdf;pdfa":
+                                        url = f.url
+                                else:
+                                    url = f.url
                         papers.append((recid, t[1], get_creation_date(recid), url))
     return papers
 
@@ -38,9 +41,9 @@ def index(req):
     for i, paper_tuple in enumerate(papers):
         req.write("""<tr><td>%i</td><td>%i</td><td>%s</td><td>%s</td>""" % (i, paper_tuple[0], paper_tuple[1], paper_tuple[2]))
         if paper_tuple[3]:
-            req.write("""<td><a href='%s'>link</a></td><tr>\n""" % (paper_tuple[3], ))
+            req.write("""<td><a href='%s'>link</a></td></tr>\n""" % (paper_tuple[3], ))
         else:
-            req.write("""<td>no pdf</td><tr>\n""")
+            req.write("""<td>no pdf</td></tr>\n""")
         req.flush()
     req.write("</table>\n")
     req.write(pagefooteronly(req=req))
