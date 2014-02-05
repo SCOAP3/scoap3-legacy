@@ -270,7 +270,7 @@ color: #6E5907;
    padding: 5px 0px 0px 0px;
    margin: 0px;
 }
-.headerboxbodylogo a, .headerboxbodylogo a:visited{
+/*.headerboxbodylogo a, .headerboxbodylogo a:visited{
    padding-left: 144px;
    background: transparent url(scoap3_logo.png) no-repeat top left;
    color: rgb(255, 255, 255); /*#36c;*/
@@ -284,9 +284,9 @@ color: #6E5907;
    margin-top: 5px;
    margin-bottom: 5px;
    text-decoration: none;
-}
+}*/
 
-.home .headerboxbodylogo a, .home .headerboxbodylogo a:visited{
+.headerboxbodylogo a, .headerboxbodylogo a:visited{
    margin-left: 5px;
    padding-left: 170px;
    background: transparent url(scoap3_logo.png) no-repeat top left;
