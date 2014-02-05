@@ -19,7 +19,14 @@ def get_list():
                 for t in rec.get('037')[0][0]:
                     if 'a' in t:
                         url = ""
-                        for f in BibRecDocs(recid).get_bibdoc('main').list_latest_files():
+                        doc = BibRecDocs(recid)
+                        names = doc.get_bibdoc_names()
+                        files = []
+                        if 'main' in names:
+                            files = doc.get_bibdoc('main').list_latest_files()
+                        elif 'fulltext' in names:
+                            files = doc.get_bibdoc('fulltext').list_latest_files()
+                        for f in files:
                             if f.format in ('.pdf', '.pdf;pdfa'):
                                 if url:
                                     if f.format is ".pdf;pdfa":
