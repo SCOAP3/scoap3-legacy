@@ -41,14 +41,14 @@ def xml_to_text(xml, delimiter=' ', tag_to_remove=None):
     if tag_to_remove:
         if tag_to_remove in xml.nodeName.encode('utf-8'):
             return ''
-
     if xml.nodeType == xml.TEXT_NODE:
-        return xml.wholeText.encode('utf-8')
+        return xml.wholeText.encode('utf-8').strip()
+    elif xml.nodeType == xml.CDATA_SECTION_NODE:
+        return xml.data.strip()
     elif 'mml:' in xml.nodeName:
         return xml.toxml().replace('mml:', '').replace('xmlns:mml', 'xmlns').encode('utf-8')
     elif xml.hasChildNodes():
-        for child in xml.childNodes:
-            return delimiter.join(' '.join(xml_to_text(child, delimiter=' ', tag_to_remove=tag_to_remove) for child in xml.childNodes).split())
+        return delimiter.join([xml_to_text(child, delimiter=delimiter, tag_to_remove=tag_to_remove) for child in xml.childNodes if xml_to_text(child, delimiter=delimiter, tag_to_remove=tag_to_remove)]).strip()
     return ''
 
 
