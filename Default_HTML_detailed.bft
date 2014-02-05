@@ -7,10 +7,6 @@
 <BFE_AUTHORS suffix="<br />" limit="25" interactive="yes" print_affiliations="yes" affiliation_prefix="<small> (" affiliation_suffix=")</small>" multiple_affiliations="yes"/>
 <BFE_ADDRESSES />
 <BFE_AFFILIATION />
-<BFE_DATE prefix="<br />" suffix="<br />"/>
-<BFE_PUBLISHER prefix="<small>" suffix="</small>"/>
-<BFE_PLACE prefix="<small>" suffix="</small>"/>
-<BFE_ISBN prefix="<br />ISBN: " />
 </p>
 
 <p style="margin-left: 15%; width: 70%">
@@ -27,7 +23,9 @@ note_prefix="<br /><small><strong>Note: </strong>"
 note_suffix=" </small>"
 suffix="<br />" />
 
-<BFE_PUBLI_INFO prefix="<br /><br /><strong>Published in: </strong>"/><br />
+
+<BFE_PUBLI_INFO prefix="<br /><br /><strong>Published in: </strong>"/>
+<BFE_PUBLISHER prefix="<br /><small><strong>Published by: </strong>" suffix="</small><br />"/>
 <BFE_DOI tag="0247_" prefix="<small><strong>DOI: </strong>" suffix="</small><br />" />
 <BFE_ARXIV_LINK prefix="<small><strong>arXiv: </strong>" suffix="</small><br />" />
 <BFE_LICENSE prefix="<small><strong>License: </strong>" suffix="</small><br />" />
@@ -35,4 +33,3 @@ suffix="<br />" />
 
 </p>
 </div>
-
