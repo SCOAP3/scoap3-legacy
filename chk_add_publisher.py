@@ -23,7 +23,7 @@ Add publisher information
 from invenio.bibrecord import record_get_field_value
 
 CFG_JOURNAL_TO_PUBLISHER_MAP = {
-    'Physics letters B': 'Elsevier',
+    'Physics Letters B': 'Elsevier',
     'Nuclear Physics B': 'Elsevier',
     'Advances in High Energy Physics': 'Hindawi Publishing Corporation',
     'Chinese Phys. C': 'Institute of Physics Publishing/Chinese Academy of Sciences',

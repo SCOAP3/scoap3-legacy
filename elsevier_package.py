@@ -52,7 +52,7 @@ CFG_ELSEVIER_ART510_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art510.zip')
 CFG_ELSEVIER_ART520_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art520.zip')
 CFG_ELSEVIER_SI510_PATH = join(CFG_SCOAP3DTDS_PATH, 'si510.zip')
 CFG_ELSEVIER_SI520_PATH = join(CFG_SCOAP3DTDS_PATH, 'si520.zip')
-CFG_ELSEVIER_JID_MAP = {'PLB': 'Physics letters B',
+CFG_ELSEVIER_JID_MAP = {'PLB': 'Physics Letters B',
                         'NUPHB': 'Nuclear Physics B',
                         'CEMGE': 'Chemical Geology',
                         'SOLMAT': 'Solar Energy Materials & Solar Cells',
