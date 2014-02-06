@@ -346,7 +346,7 @@ class Template(DefaultTemplate):
              </thead>
              <tbody>
               <tr valign="top">
-                <td class="searchboxbody"><input type="text" name="p" size="%(sizepattern)d" value="%(p)s" class="simplesearchfield"/></td>
+                <td class="searchboxbody"><input type="search" name="p" size="%(sizepattern)d" value="%(p)s" class="simplesearchfield" autofocus="autofocus" /></td>
                 <td class="searchboxbody">%(searchwithin)s</td>
                 <td class="searchboxbody">
                   <input class="formbutton" type="submit" name="action_search" value="%(search)s" />
@@ -650,7 +650,7 @@ class Template(DefaultTemplate):
          </thead>
          <tbody>
           <tr valign="baseline">
-           <td class="searchboxbody" align="left"><input type="text" name="p" size="%(sizepattern)d" value="" class="simplesearchfield"/></td>
+           <td class="searchboxbody" align="left"><input type="search" name="p" size="%(sizepattern)d" value="" class="simplesearchfield" autofocus="autofocus" /></td>
            <td class="searchboxbody" align="left">%(middle_option)s</td>
            <td class="searchboxbody" align="left">
              <input class="formbutton" type="submit" name="action_search" value="%(msg_search)s" />
@@ -747,21 +747,21 @@ class Template(DefaultTemplate):
          <tbody>
           <tr valign="bottom">
             <td class="searchboxbody" style="white-space: nowrap;">
-                %(matchbox_m1)s<input type="text" name="p1" size="%(sizepattern)d" value="" class="advancedsearchfield"/>
+                %(matchbox_m1)s<input type="search" name="p1" size="%(sizepattern)d" value="" class="advancedsearchfield"/>
             </td>
             <td class="searchboxbody" style="white-space: nowrap;">%(middle_option_1)s</td>
             <td class="searchboxbody">%(andornot_op1)s</td>
           </tr>
           <tr valign="bottom">
             <td class="searchboxbody" style="white-space: nowrap;">
-                %(matchbox_m2)s<input type="text" name="p2" size="%(sizepattern)d" value="" class="advancedsearchfield"/>
+                %(matchbox_m2)s<input type="search" name="p2" size="%(sizepattern)d" value="" class="advancedsearchfield"/>
             </td>
             <td class="searchboxbody">%(middle_option_2)s</td>
             <td class="searchboxbody">%(andornot_op2)s</td>
           </tr>
           <tr valign="bottom">
             <td class="searchboxbody" style="white-space: nowrap;">
-                %(matchbox_m3)s<input type="text" name="p3" size="%(sizepattern)d" value="" class="advancedsearchfield"/>
+                %(matchbox_m3)s<input type="search" name="p3" size="%(sizepattern)d" value="" class="advancedsearchfield"/>
             </td>
             <td class="searchboxbody">%(middle_option_3)s</td>
             <td class="searchboxbody" style="white-space: nowrap;">
