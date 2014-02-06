@@ -188,6 +188,9 @@ template function generated it.
   </div>
   </td>
  </tr>
+ <tr style="background-color: #679A70;">
+  <td style="padding: 10px; font-size: medium; color: #FFF;"><a href="/" style="text-decoration: none; color: #FFF;">HOME</a> :: <a href="http://scoap3.org/" style="text-decoration: none; color: #FFF;">SCOAP<sup>3</sup></a> :: <a href="http://scoap3.org/scoap3-repository-help" style="text-decoration: none; color: #FFF;">HELP</a> :: <a href="http://scoap3.org/scoap3-repository" style="text-decoration: none; color: #FFF;">ABOUT</a></td>
+ </tr>
  <!--
  <tr class="menu">
        <td class="headermoduleboxbodyblank">
