@@ -921,7 +921,21 @@ class Template(DefaultTemplate):
             style_prolog = ""
             style_epilog = ""
 
-        out = """<table class="%(narrowsearchbox)s">
+        out = """
+                <script type="text/javascript">
+                  $(document).ready(function(){
+                    $('form[name="search"]').on("submit", function() {
+                        var one_unchecked = false;
+                        $("input[name='c']").each(function() {
+                            if ($(this).prop("checked") === false) one_unchecked = true;
+                        });
+                        if (one_unchecked === true) return true;
+                        $('input[name="c"]').prop("checked", false);
+                        return true;
+                    });
+                  });
+                </script>
+                <table class="%(narrowsearchbox)s">
                    <thead>
                     <tr>
                      <th colspan="2" align="left" class="%(narrowsearchbox)sheader">
