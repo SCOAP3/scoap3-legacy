@@ -1,6 +1,7 @@
 import sys
 import time
 import traceback
+import logging
 
 from datetime import datetime
 from invenio.bibtask import task_low_level_submission
@@ -124,6 +125,7 @@ class SpringerPackage(object):
         self._dois = []
         self.articles_normalized = []
         self.logger = create_logger("Springer")
+        self.logger.setLevel(logging.DEBUG)
 
         if not path and package_name:
             self.logger.info("Got package: %s" % (package_name,))
@@ -252,16 +254,19 @@ class SpringerPackage(object):
             print >> out, "<collection>"
             for i, path in enumerate(self.found_articles):
                 try:
-                    if "EPJC" in path:
-                        for filename in listdir(path):
-                            if "_nlm.xml" in filename:
-                                jats_parser = JATSParser(tag_to_remove="tex-math")
-                                print >> out, jats_parser.get_record(join(path, filename), publisher='Springer', collection='SCOAP3', logger=self.logger)
-                    else:
-                        for filename in listdir(path):
-                            if ".xml.scoap" in filename:
-                                app_parser = APPParser()
-                                print >> out, app_parser.get_record(join(path, filename), publisher='SISSA', collection='SCOAP3', logger=self.logger)
+                    for filename in listdir(path):
+                        if filename.endswith(".xml.scoap"):
+                            self.logger.info("%s is JHEP" % path)
+                            self.logger.info("Found %s. Calling APPParser" % filename)
+                            app_parser = APPParser()
+                            print >> out, app_parser.get_record(join(path, filename), publisher='SISSA', collection='SCOAP3', logger=self.logger)
+                            break
+                        elif filename.endswith("_nlm.xml"):
+                            self.logger.info("%s is EPJC" % path)
+                            self.logger.info("Found %s. Calling JATSParser" % filename)
+                            jats_parser = JATSParser(tag_to_remove="tex-math")
+                            print >> out, jats_parser.get_record(join(path, filename), publisher='Springer', collection='SCOAP3', logger=self.logger)
+                            break
                     print path, i + 1, "out of", len(self.found_articles)
                 except Exception, err:
                     register_exception(alert_admin=True)
