@@ -20,21 +20,26 @@ def get_list():
                 for t in rec.get('037')[0][0]:
                     if 'a' in t:
                         url = ""
+                        url_type = ""
                         doc = BibRecDocs(recid)
                         names = doc.get_bibdoc_names()
                         files = []
+                        checksum = None
                         if 'main' in names:
                             files = doc.get_bibdoc('main').list_latest_files()
                         elif 'fulltext' in names:
                             files = doc.get_bibdoc('fulltext').list_latest_files()
                         for f in files:
                             if f.format in ('.pdf', '.pdf;pdfa'):
-                                if url:
-                                    if f.format is ".pdf;pdfa":
-                                        url = f.url
+                                if f.format == ".pdf;pdfa":
+                                    url = f.url
+                                    url_type = ".pdf;pdfa"
                                 else:
                                     url = f.url
-                        papers.append((recid, t[1], get_creation_date(recid), url))
+                                    url_type = ".pdf"
+                            if url:
+                                checksum = f.checksum
+                        papers.append((recid, t[1], get_creation_date(recid), checksum, url, url_type))
     return papers
 
 
@@ -47,9 +52,9 @@ def index(req):
 
     papers = get_list()
     for i, paper_tuple in enumerate(papers):
-        req.write("""<tr><td>%i</td><td>%i</td><td>%s</td><td>%s</td>""" % (i, paper_tuple[0], paper_tuple[1], paper_tuple[2]))
+        req.write("""<tr><td>%i</td><td>%i</td><td>%s</td><td>%s</td><td>%s</td>""" % (i, paper_tuple[0], paper_tuple[1], paper_tuple[2], paper_tuple[3]))
         if paper_tuple[3]:
-            req.write("""<td><a href='%s'>link</a></td></tr>\n""" % (paper_tuple[3], ))
+            req.write("""<td><a href='%s'>link</a></td></tr>\n""" % (paper_tuple[4], ))
         else:
             req.write("""<td>no pdf</td></tr>\n""")
         req.flush()
@@ -61,9 +66,9 @@ def index(req):
 def csv(req):
     req.content_type = 'text/csv; charset=utf-8'
     req.headers_out['content-disposition'] = 'attachment; filename=scoap3.csv'
-    header = ','.join(('recid', 'arxiv_id', 'cr_date', 'link'))
+    header = ','.join(('recid', 'arxiv_id', 'cr_date', 'checksum', 'link', 'type'))
     print >> req, header
     papers = get_list()
     for paper_tuple in papers:
-        line = '%i, %s, %s, %s' % paper_tuple
+        line = '%i, %s, %s, %s, %s, %s' % paper_tuple
         print >> req, line
