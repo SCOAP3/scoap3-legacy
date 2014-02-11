@@ -22,6 +22,7 @@ utils = jats_utils.py minidom_utils.py nlm_utils.py app_utils.py
 bibtasklets = bst_springer.py bst_elsevier.py bst_oxford.py bst_doi_timestamp.py
 bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py
 bibcheck_rules = rules.cfg
+bibexport_config = sitemap.cfg
 bibformat_elements = bfe_publi_info.py
 bibformat_templates = Default_HTML_actions.bft Default_HTML_detailed.bft Default_HTML_brief.bft
 www_scripts = nations.py ffts_for_inspire.py
@@ -55,6 +56,7 @@ install:
 	$(INSTALL) -t $(ETCDIR)/bibcheck $(bibcheck_rules)
 	$(INSTALL) -t $(ETCDIR)/bibformat/format_templates $(bibformat_templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibformat_elements $(bibformat_elements)
+	$(INSTALL) -t $(ETCDIR)/bibexport $(bibexport_config)
 
 	$(INSTALL) -t $(WWWDIR) robots.txt
 	$(INSTALL) -t $(WWWDIR) $(www_scripts)
