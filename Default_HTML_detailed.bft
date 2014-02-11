@@ -7,6 +7,9 @@
 <BFE_AUTHORS suffix="<br />" limit="25" interactive="yes" print_affiliations="yes" affiliation_prefix="<small> (" affiliation_suffix=")</small>" multiple_affiliations="yes"/>
 <BFE_ADDRESSES />
 <BFE_AFFILIATION />
+<div style="text-align: center;">
+<BFE_CREATION_DATE format="%d %M %Y" />
+</div>
 </p>
 
 <p style="margin-left: 15%; width: 70%">
