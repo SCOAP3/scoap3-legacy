@@ -3975,4 +3975,10 @@ img.login_button_big {
 img.login_button_small {
     border-radius: 2px;
 }
+
+.compliance td{
+    border: solid 1px black;
+    border-spacing: 0;
+    border-collapse: separate;
+}
 /* end of invenio.css */
