@@ -9,28 +9,15 @@ from invenio.search_engine import get_record
 from invenio.bibdocfile import BibRecDocs
 
 def get_pdf(recid):
-    url = ""
-    url_type = ""
-    doc = BibRecDocs(recid)
-    names = doc.get_bibdoc_names()
-    files = []
-    checksum = None
-    if 'main' in names:
-        files = doc.get_bibdoc('main').list_latest_files()
-    elif 'fulltext' in names:
-        files = doc.get_bibdoc('fulltext').list_latest_files()
-    for f in files:
-        if f.format in ('.pdf', '.pdf;pdfa'):
-            if f.format == ".pdf;pdfa":
-                url = f.url
-                url_type = ".pdf;pdfa"
-            else:
-                url = f.url
-                url_type = ".pdf"
-        if url:
-            checksum = f.checksum
-
-    return checksum, url, url_type
+    bibrecdocs = BibRecDocs(recid)
+    for bibdoc in bibrecdocs.list_bibdocs():
+        if bibdoc.format_already_exists_p(".pdf"):
+            docfile = bibdoc.get_file(".pdf")
+            return docfile.checksum, docfile.url, ".pdf"
+        elif bibdoc.format_already_exists_p(".pdf;pdfa"):
+            docfile = bibdoc.get_file(".pdf;pdfa")
+            return docfile.checksum, docfile.url, ".pdf;pdfa"
+    return None, None, None
 
 def get_list():
     papers = []
