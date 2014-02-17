@@ -36,11 +36,11 @@ def get_last_pdf_for_record(bibrecdocs):
             continue
 
 def build_fft(bibdocfile):
-    return {
-        'a': bibdocfile.get_path(),
-        'n': bibdocfile.get_name(),
-        'f': bibdocfile.get_format(),
-    }
+    return [{
+        'url': bibdocfile.get_path(),
+        'docname': bibdocfile.get_name(),
+        'format': bibdocfile.get_format(),
+    }]
 
 def bst_fix_ffts(debug=0):
     debug = bool(int(debug))
@@ -49,7 +49,7 @@ def bst_fix_ffts(debug=0):
         task_sleep_now_if_required(can_stop_too=True)
         write_message("Fixing %s" % recid)
         try:
-            ffts[recid] = [build_fft(get_last_pdf_for_record(BibRecDocs(recid)))]
+            ffts[recid] = build_fft(get_last_pdf_for_record(BibRecDocs(recid)))
         except:
             register_exception(alert_admin=True)
     write_message("Uploading corrections")
