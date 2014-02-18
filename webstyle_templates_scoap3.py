@@ -160,7 +160,7 @@ template function generated it.
     <style type="text/css">div.restrictedflag {filter:none;}</style>
  <![endif]-->
  %(canonical_and_alternate_urls)s
- <link rel="alternate" type="application/rss+xml" title="%(sitename)s RSS" href="%(rssurl)s" />
+ <!-- <link rel="alternate" type="application/rss+xml" title="%(sitename)s RSS" href="%(rssurl)s" /> -->
  <link rel="search" type="application/opensearchdescription+xml" href="%(siteurl)s/opensearchdescription" title="%(sitename)s" />
  <link rel="unapi-server" type="application/xml" title="unAPI" href="%(unAPIurl)s" />
  <link rel="icon" href="/img/favicon.ico" type="image/x-icon">
