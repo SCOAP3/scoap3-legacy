@@ -30,13 +30,13 @@ from invenio.dbquery import run_sql
 
 
 CFG_SCOAP3_DOIS = {
-    "10.1016": re.compile(r"^%s|^%s" % (re.escape("10.1016/j.physletb."), re.escape("10.1016/j.nuclphysb."))), # Elsevier
+    "10.1016": re.compile(r"^%s|^%s" % (re.escape("10.1016/j.physletb."), re.escape("10.1016/j.nuclphysb.")), re.I), # Elsevier
     "10.1155": None, # Hindawi
-    "10.1088": re.compile(r"^10\.1088\/(1674-1137|1475-7516|1367-2630)"), # IOPP,
-    "10.5506": re.compile(r"^10\.5506\/APhysPolB\."), # Acta
-    "10.1093": re.compile(r"^10\.1093\/ptep\/"), # Oxford
-    "10.1140": re.compile(r"^10\.1140\/epjc\/"), # Springer EPJC
-    "10.1007": re.compile(r"^10\.1007\/JHEP") # Springer Sissa
+    "10.1088": re.compile(r"^10\.1088\/(1674-1137|1475-7516|1367-2630)", re.I), # IOPP,
+    "10.5506": re.compile(r"^10\.5506\/APhysPolB\.", re.I), # Acta
+    "10.1093": re.compile(r"^10\.1093\/ptep\/", re.I), # Oxford
+    "10.1140": re.compile(r"^10\.1140\/epjc\/", re.I), # Springer EPJC
+    "10.1007": re.compile(r"^10\.1007\/JHEP", re.I) # Springer Sissa
 }
 
 def prepate_doi_table():
