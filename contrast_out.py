@@ -194,10 +194,15 @@ class ContrastOutConnector(object):
             journal_issues = dataset_xml.getElementsByTagName('journal-issue')
             if journal_issues:
                 for journal_issue in journal_issues:
-                    filename = xml_to_text(journal_issue.getElementsByTagName('ml')[0].getElementsByTagName('pathname')[0])
-                    self.logger.info("Found issue %s in %s." % (filename, name))
-                    pathname = join(self.path_unpacked, name.split('.')[0], filename)
-                    self.found_issues.append(pathname)
+                    try:
+                        filename = xml_to_text(journal_issue.getElementsByTagName('ml')[0].getElementsByTagName('pathname')[0])
+                        self.logger.info("Found issue %s in %s." % (filename, name))
+                        pathname = join(self.path_unpacked, name.split('.')[0], filename)
+                        self.found_issues.append(pathname)
+                    except Exception, err:
+                        self.logger.error("%s", (err, ))
+                        print >> sys.stdout, err
+                        continue
             else:
                 def visit(arg, dirname, names):
                     if "issue.xml" in names:

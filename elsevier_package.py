@@ -567,7 +567,7 @@ def main():
                     els = ElsevierPackage(path=path_or_package)
         els.bibupload_it()
     except Exception, err:
-        register_exception()
+        register_exception(alert_admin=True)
         print >> sys.stderr, "ERROR: Exception captured: %s" % err
         traceback.print_exc(file=sys.stdout)
         sys.exit(1)

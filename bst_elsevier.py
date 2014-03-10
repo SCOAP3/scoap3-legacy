@@ -23,7 +23,7 @@ Springer BibTaskLet
 
 from invenio.elsevier_package import ElsevierPackage
 
+
 def bst_elsevier():
     els = ElsevierPackage()
     els.bibupload_it()
-
