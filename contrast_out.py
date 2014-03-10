@@ -1,5 +1,6 @@
 import sys
 import time
+import socket
 
 from datetime import datetime
 from functools import partial
@@ -27,6 +28,10 @@ from invenio.errorlib import register_exception
 CFG_READY_PACKAGES = join(CFG_CONTRASTOUT_DOWNLOADDIR, "ready_pkgs")
 CFG_TAR_FILES = join(CFG_CONTRASTOUT_DOWNLOADDIR, "tar_files")
 
+# The following 2 magic keywords are local. They should be moved to the harvestkit config at some time
+CFG_FTP_CONNECTION_ATTEMPTS = 3
+CFG_FTP_TIMEOUT_SLEEP_DURATION = 2
+
 class ContrastOutConnector(object):
     def __init__(self, logger):
         self.ftp = None
@@ -42,13 +47,21 @@ class ContrastOutConnector(object):
 
     def connect(self):
         """Logs into the specified ftp server and returns connector."""
-        try:
-            self.ftp = FTP(CFG_CONTRAST_OUT_URL)
-            self.ftp.login(user=CFG_CONTRAST_OUT_LOGIN, passwd=CFG_CONTRAST_OUT_PASSWORD)
-            self.logger.debug("Succesful connection to the Elsevier server")
-        except Exception as err:
-            self.logger.error("Faild to connect to the Elsevier server. %s" % (err,))
-            raise Exception
+        for tryed_connection_count in range(CFG_FTP_CONNECTION_ATTEMPTS):
+            try:
+                self.ftp = FTP(CFG_CONTRAST_OUT_URL)
+                self.ftp.login(user=CFG_CONTRAST_OUT_LOGIN, passwd=CFG_CONTRAST_OUT_PASSWORD)
+                self.logger.debug("Successful connection to the Elsevier server")
+                return
+            except socket.timeout as err:
+            	self.logger.error('Failed to connect %d of %d times. Will sleep for %d seconds and try again.' %(tryed_connection_count+1, CFG_FTP_CONNECTION_ATTEMPTS, CFG_FTP_TIMEOUT_SLEEP_DURATION))
+                time.sleep(CFG_FTP_TIMEOUT_SLEEP_DURATION)
+            except Exception as err:
+                self.logger.error('Failed to connect to the Elsevier server. %s' % (err,))
+                break
+
+        register_exception(alert_admin=True, prefix='Failed to connect to the Elsevier server. %s' % (err,))
+        
 
     def _get_file_listing(self, phrase=None, new_only=True):
         if phrase:
