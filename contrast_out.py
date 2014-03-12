@@ -1,6 +1,6 @@
 import sys
 import time
-import socket
+from socket import timeout as socket_timeout_exception
 
 from datetime import datetime
 from functools import partial
@@ -32,6 +32,11 @@ CFG_TAR_FILES = join(CFG_CONTRASTOUT_DOWNLOADDIR, "tar_files")
 CFG_FTP_CONNECTION_ATTEMPTS = 3
 CFG_FTP_TIMEOUT_SLEEP_DURATION = 2
 
+
+class LoginException(Exception):
+    pass
+
+
 class ContrastOutConnector(object):
     def __init__(self, logger):
         self.ftp = None
@@ -49,19 +54,19 @@ class ContrastOutConnector(object):
         """Logs into the specified ftp server and returns connector."""
         for tryed_connection_count in range(CFG_FTP_CONNECTION_ATTEMPTS):
             try:
-                self.ftp = FTP(CFG_CONTRAST_OUT_URL)
-                self.ftp.login(user=CFG_CONTRAST_OUT_LOGIN, passwd=CFG_CONTRAST_OUT_PASSWORD)
+                self.ftp = FTP(CFG_CONTRAST_OUT_URL, timeout=0.1)
+                self.ftp.login(user=CFG_CONTRAST_OUT_LOGIN,
+                               passwd=CFG_CONTRAST_OUT_PASSWORD)
                 self.logger.debug("Successful connection to the Elsevier server")
                 return
-            except socket.timeout as err:
-            	self.logger.error('Failed to connect %d of %d times. Will sleep for %d seconds and try again.' %(tryed_connection_count+1, CFG_FTP_CONNECTION_ATTEMPTS, CFG_FTP_TIMEOUT_SLEEP_DURATION))
+            except socket_timeout_exception as err:
+                self.logger.error('Failed to connect %d of %d times. Will sleep for %d seconds and try again.' % (tryed_connection_count+1, CFG_FTP_CONNECTION_ATTEMPTS, CFG_FTP_TIMEOUT_SLEEP_DURATION))
                 time.sleep(CFG_FTP_TIMEOUT_SLEEP_DURATION)
             except Exception as err:
                 self.logger.error('Failed to connect to the Elsevier server. %s' % (err,))
                 break
 
-        register_exception(alert_admin=True, prefix='Failed to connect to the Elsevier server. %s' % (err,))
-        
+        raise LoginException(err)
 
     def _get_file_listing(self, phrase=None, new_only=True):
         if phrase:
@@ -265,10 +270,13 @@ class ContrastOutConnector(object):
 
     def run(self, run_localy=False):
         if not run_localy:
-            self.connect()
-            self._get_file_listing('.ready')
             try:
+                self.connect()
+                self._get_file_listing('.ready')
                 self._download_file_listing()
+            except LoginException as err:
+                register_exception(alert_admin=True, prefix='Failed to connect to the Elsevier server. %s' % (err,))
+                return
             except:
                 self.logger.info("No new packages to process.")
                 print >> sys.stdout, "No new packages to process."
@@ -279,7 +287,7 @@ class ContrastOutConnector(object):
         else:
             self.logger.info("Running on local files.")
             self.retrieved_packages_unpacked = []
-            self.files_list =[]
+            self.files_list = []
             for p in listdir(CFG_TAR_FILES):
                 self.retrieved_packages_unpacked.append(join(CFG_TAR_FILES, p))
             for p in listdir(CFG_READY_PACKAGES):
