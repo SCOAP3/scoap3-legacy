@@ -2,6 +2,7 @@ import sys
 import time
 import traceback
 import logging
+from socket import timeout as socket_timeout_exception
 
 from datetime import datetime
 from invenio.bibtask import task_low_level_submission
@@ -34,6 +35,14 @@ CFG_SPRINGER_JATS_PATH = join(CFG_SCOAP3DTDS_PATH, 'jats-archiving-dtd-1.0.zip')
 
 CFG_TAR_FILES = join(CFG_SPRINGER_DOWNLOADDIR, "tar_files")
 
+# Those magic keywords should be moved at some point to
+CFG_FTP_CONNECTION_ATTEMPTS = 3
+CFG_FTP_TIMEOUT_SLEEP_DURATION = 2
+
+
+class LoginException(Exception):
+    pass
+
 
 class SpringerPackage(object):
     """
@@ -47,14 +56,23 @@ class SpringerPackage(object):
     @note: either C{package_name} or C{path} don't have to be passed to the
     constructor, in this case the Springer server will be harvested.
     """
+
     def connect(self):
         """Logs into the specified ftp server and returns connector."""
-        try:
-            self.ftp = FTP(CFG_URL)
-            self.ftp.login(user=CFG_LOGIN, passwd=CFG_PASSWORD)
-            self.logger.debug("Succesful connection to the Springer server")
-        except:
-            self.logger.error("Faild to connect to the Springer server.")
+        for tryed_connection_count in range(CFG_FTP_CONNECTION_ATTEMPTS):
+            try:
+                self.ftp = FTP(CFG_URL)
+                self.ftp.login(user=CFG_LOGIN, passwd=CFG_PASSWORD)
+                self.logger.debug("Successful connection to the Springer server")
+                return
+            except socket_timeout_exception as err:
+                self.logger.error('Failed to connect %d of %d times. Will sleep for %d seconds and try again.' % (tryed_connection_count+1, CFG_FTP_CONNECTION_ATTEMPTS, CFG_FTP_TIMEOUT_SLEEP_DURATION))
+                time.sleep(CFG_FTP_TIMEOUT_SLEEP_DURATION)
+            except Exception as err:
+                self.logger.error("Failed to connect to the Springer server. %s" % (err,))
+                break
+
+        raise LoginException(err)
 
     def _get_file_listing(self, phrase=None, new_only=True):
         try:
@@ -136,10 +154,13 @@ class SpringerPackage(object):
         self._crawl_springer_and_find_main_xml()
 
     def run(self):
-        self.connect()
-        self._get_file_listing()
         try:
+            self.connect()
+            self._get_file_listing()
             self._download_tars()
+        except LoginException as err:
+            register_exception(alert_admin=True, prefix="Failed to connect to the Springer server. %s" % (err,))
+            return
         except NoNewFiles:
             return
         self._extract_packages()
