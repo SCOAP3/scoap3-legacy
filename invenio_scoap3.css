@@ -3981,4 +3981,35 @@ img.login_button_small {
     border-spacing: 0;
     border-collapse: separate;
 }
+
+#selectable .ui-selecting {
+    background-color: #679A70;
+}
+
+#selectable .ui-selected {
+    background-color: #679A70;
+    color: white;
+}   
+
+#selectable li {
+    float: left;
+    width: 100px;
+    height: 20px;
+    text-align: center;
+}
+
+.ui-datepicker {
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-color: gray;
+}
+
+.ui-datepicker select{
+    width: 50%;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {
+    display: none;
+}
 /* end of invenio.css */
