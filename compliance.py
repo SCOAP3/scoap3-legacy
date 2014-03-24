@@ -21,17 +21,26 @@ JOURNALS_PDFA = {'ELS/NPB': 'nuclphysb', 'ELS/PLB': 'physletb', 'SPR/EPJC': 'epj
 JOURNALS_NO_PDFA = {'IOP/CPC': '1674-1137', 'IOP/JCAP': '1475-7516', 'IOP/NJP': '1367-2630'}
 JOURNALS_NO_XML = {'JAG/ACTA': 'APhysPolB'}
 
-non_compliance_checks = {"cc": RawTextSearch("-('CC-BY' 'CC BY' 'Creative Commons Attribution')"),
-                         "authors": RawTextSearch("-(/(c|\(c\)) the author/ 'copyright cern')"),
-                         "scoap3": RawTextSearch("-'funded by SCOAP'"),
-                         "hmmm": RawTextSearch("/(copyright|c)[^.]*(IOP|Institute of Physics)/")
+non_compliance_checks = {"cc": RawTextSearch("-('CC-BY' 'CC BY' 'Creative Commons Attribution') /(copyright|c|©)[^.]*(IOP|Institute of Physics)/"),
+                         "authors": RawTextSearch("-(/(c|\(c\)|©) the author/ 'copyright cern')"),
+                         "scoap3": RawTextSearch("-'funded by SCOAP'")
                          }
+
+
+def get_latest_pdf(bibrec_latest_files):
+    for file in bibrec_latest_files:
+        if file.format == '.pdf' or file.format == '.pdf;pdfa':
+            return file
+    return None
 
 
 def is_compliant(recid, non_compliance_checks_key):
     bibrec = BibRecDocs(recid)
-    rawtext = bibrec.list_bibdocs()[0].get_text()
-    rawtext = BibRecDocs(recid).list_bibdocs()[0].get_text()
+    bibdoc = get_latest_pdf(bibrec.list_latest_files())
+    try:
+        rawtext = bibdoc.bibdoc.get_text()
+    except:
+        return "<b>NO</b>"
 
     if non_compliance_checks[non_compliance_checks_key].search(rawtext):
         return "<b>NO</b>"
@@ -144,10 +153,10 @@ def check_complete_rec(dict_with_vals):
     return True
 
 
-def check_journal(dictionary, journal_list, f_date, t_date, desired_date, return_val):
+def write_html(dictionary, journal_list, f_date, t_date, created_or_modified_date, return_val):
     for key in journal_list:
         val = dictionary[key]
-        papers = perform_request_search(p="date%s:%s->%s 024:'%s'" % (desired_date, f_date, t_date, val,))
+        papers = perform_request_search(p="date%s:%s->%s 024:'%s'" % (created_or_modified_date, f_date, t_date, val,))
 
         if papers == []:
             continue
@@ -207,10 +216,8 @@ def check_journal(dictionary, journal_list, f_date, t_date, desired_date, return
         return_val.append("</table>\n")
 
 
-def filter_compliance_test(req, collections='', from_date='', to_date='', desired_date=''):
-    return_val = []
+def prepare_filter_variables(collections, from_date, to_date):
     collections = collections.split()
-
     if collections == []:
         pdfa_journals = sorted([item for item in JOURNALS_PDFA])
         no_pdfa_journals = sorted([item for item in JOURNALS_NO_PDFA])
@@ -225,10 +232,17 @@ def filter_compliance_test(req, collections='', from_date='', to_date='', desire
     if to_date == '':
         to_date = strftime("%Y-%m-%d")
 
-    check_journal(JOURNALS_PDFA, pdfa_journals, from_date, to_date, desired_date, return_val)
-    check_journal(JOURNALS_NO_PDFA, no_pdfa_journals, from_date, to_date, desired_date, return_val)
-    check_journal(JOURNALS_NO_XML, no_xml_journals, from_date, to_date, desired_date, return_val)
-    return_val.append(pagefooteronly(req=req))
+    return pdfa_journals, no_pdfa_journals, no_xml_journals, from_date, to_date
+
+
+def check_compliance_html(req, collections='', from_date='', to_date='', created_or_modified_date=''):
+    return_val = []
+
+    pdfa_journals, no_pdfa_journals, no_xml_journals, from_date, to_date = prepare_filter_variables(collections, from_date, to_date)
+
+    write_html(JOURNALS_PDFA, pdfa_journals, from_date, to_date, created_or_modified_date, return_val)
+    write_html(JOURNALS_NO_PDFA, no_pdfa_journals, from_date, to_date, created_or_modified_date, return_val)
+    write_html(JOURNALS_NO_XML, no_xml_journals, from_date, to_date, created_or_modified_date, return_val)
     return "".join(return_val)
 
 
@@ -251,8 +265,6 @@ def index(req):
     req.write("<input type='text' id='datepicker_from'>")
     req.write(" and:")
     req.write("<input type='text' id='datepicker_to'>")
-    # req.write("<button onclick=\"$.get('/compliance.py/test', {collections:'ELS'}).done(function(data){$('#content').html(data)});\">Check Compliance</button>")
-    # $.get('/compliance.py/test', {collections:journals; f_date:from_date; t_date:to_date}).done(function(data){$('#content').html(data);});
     req.write('''
             <button onclick=\"
                 var journals = '';
@@ -262,14 +274,14 @@ def index(req):
                     }
                 );
 
-        $('#content').html('');
+                $('#content').html('Loading...');
 
                 from_date = $('#datepicker_from').val();
                 to_date = $('#datepicker_to').val();
 
                 selected_date = $('#date_selector option:selected').text();
 
-                $.get('/filter_compliance.py/filter_compliance_test', {collections:journals, from_date:from_date, to_date:to_date, desired_date:selected_date}).done(function(data){$('#content').html(data);});
+                $.get('/compliance.py/check_compliance_html', {collections:journals, from_date:from_date, to_date:to_date, created_or_modified_date:selected_date}).done(function(data){$('#content').html(data);});
 
                 \">Check Compliance</button>
         ''')
@@ -289,7 +301,7 @@ def index(req):
                 selected_date = $('#date_selector option:selected').text();
 
                 var iframe = document.createElement('iframe');
-                iframe.src = '/filter_compliance.py/filter_csv?collections=' + journals + '&from_date=' + from_date + '&to_date=' + to_date + '&desired_date=' + selected_date; 
+                iframe.src = '/compliance.py/check_compliance_csv?collections=' + journals + '&from_date=' + from_date + '&to_date=' + to_date + '&created_or_modified_date=' + selected_date; 
                 iframe.style.display = 'none';
                 document.body.appendChild(iframe);
 
@@ -306,16 +318,17 @@ def index(req):
         </script>''')
 
     req.write("<div id=\"content\"></div>")
+    req.write(pagefooteronly(req=req))
     req.flush()
 
 
-def write_csv(req, dictionary, journal_list, f_date, t_date, desired_date):
+def write_csv(req, dictionary, journal_list, f_date, t_date, created_or_modified_date):
 
     return_val = ''
 
     for key in journal_list:
         val = dictionary[key]
-        papers = perform_request_search(p="date%s:%s->%s 024:'%s'" % (desired_date, f_date, t_date, val,))
+        papers = perform_request_search(p="date%s:%s->%s 024:'%s'" % (created_or_modified_date, f_date, t_date, val,))
 
         if papers == []:
             continue
@@ -339,34 +352,19 @@ def write_csv(req, dictionary, journal_list, f_date, t_date, desired_date):
                                    is_compliant(recid, 'authors').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'cc').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'scoap3').lstrip('<b>').rstrip('</b>'),
-                                   is_compliant(recid, 'authors').lstrip('<b>').rstrip('</b>'),
-                                   is_compliant(recid, 'cc').lstrip('<b>').rstrip('</b>'),
-                                   is_compliant(recid, 'scoap3').lstrip('<b>').rstrip('</b>'),
                                    str([rec_key for rec_key, rec_val in record_compl.iteritems() if not rec_val])])
             return_val += '\n'
 
     return return_val
 
 
-def filter_csv(req, collections='', from_date='', to_date='', desired_date=''):
+def check_compliance_csv(req, collections='', from_date='', to_date='', created_or_modified_date=''):
     req.content_type = 'text/csv; charset=utf-8'
     req.headers_out['content-disposition'] = 'attachment; filename=scoap3_compliance.csv'
 
-    collections = collections.split()
+    pdfa_journals, no_pdfa_journals, no_xml_journals, from_date, to_date = prepare_filter_variables(collections, from_date, to_date)
 
-    if collections == []:
-        pdfa_journals = sorted([item for item in JOURNALS_PDFA])
-        no_pdfa_journals = sorted([item for item in JOURNALS_NO_PDFA])
-        no_xml_journals = sorted([item for item in JOURNALS_NO_XML])
-    else:
-        pdfa_journals = sorted([item for item in JOURNALS_PDFA for collection in collections if item.lower().find(collection.lower()) != -1])
-        no_pdfa_journals = sorted([item for item in JOURNALS_NO_PDFA for collection in collections if item.lower().find(collection.lower()) != -1])
-        no_xml_journals = sorted([item for item in JOURNALS_NO_XML for collection in collections if item.lower().find(collection.lower()) != -1])
-
-    if from_date == '':
-        from_date = '1970-01-01'
-    if to_date == '':
-        to_date = strftime("%Y-%m-%d")
-
-    tmp = write_csv(req, JOURNALS_PDFA, pdfa_journals, from_date, to_date, desired_date) + write_csv(req, JOURNALS_NO_PDFA, no_pdfa_journals, from_date, to_date, desired_date) + write_csv(req, JOURNALS_NO_XML, no_xml_journals, from_date, to_date, desired_date)
+    tmp = write_csv(req, JOURNALS_PDFA, pdfa_journals, from_date, to_date, created_or_modified_date) \
+        + write_csv(req, JOURNALS_NO_PDFA, no_pdfa_journals, from_date, to_date, created_or_modified_date) \
+        + write_csv(req, JOURNALS_NO_XML, no_xml_journals, from_date, to_date, created_or_modified_date)
     print >> req, tmp
