@@ -54,7 +54,7 @@ class ContrastOutConnector(object):
         """Logs into the specified ftp server and returns connector."""
         for tryed_connection_count in range(CFG_FTP_CONNECTION_ATTEMPTS):
             try:
-                self.ftp = FTP(CFG_CONTRAST_OUT_URL, timeout=0.1)
+                self.ftp = FTP(CFG_CONTRAST_OUT_URL)
                 self.ftp.login(user=CFG_CONTRAST_OUT_LOGIN,
                                passwd=CFG_CONTRAST_OUT_PASSWORD)
                 self.logger.debug("Successful connection to the Elsevier server")
