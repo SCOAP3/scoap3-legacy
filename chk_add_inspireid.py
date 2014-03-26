@@ -74,4 +74,4 @@ def check_records(records):
             else:
                 record.warn("More than one inspire ID matches this record: %s" % inspireid)
                 continue
-        record.add_field('035__', value=None, subfields=[('a', str(inspireid)), ('9', "INSPIRE")])
+        record.add_field('035__', value='', subfields=[('a', str(inspireid)), ('9', "INSPIRE")])

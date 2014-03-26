@@ -54,4 +54,4 @@ def check_records(records):
                 break
             else:
                 ## The field does not already exist. Let's add a whole field
-                record.add_field('260__', value=None, subfields=[('b', publisher)])
+                record.add_field('260__', value='', subfields=[('b', publisher)])
