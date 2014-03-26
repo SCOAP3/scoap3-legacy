@@ -21,7 +21,7 @@
 Add INSPIRE ID
 """
 from invenio.bibrecord import record_get_field_values, record_get_field_value
-from invenio.dbquery import run_sql
+from invenio.dbquery import run_sql, IntegrityError
 from invenio.urlutils import create_url
 from urllib import urlopen
 from time import sleep
@@ -65,7 +65,12 @@ def check_records(records):
             inspireid = [int(elem.strip()) for elem in urlopen(create_url("http://inspirehep.net/search", {'cc': 'HEP', 'of': 'id', 'p': query})).read().strip()[1:-1].split(',') if elem.strip()]
             if len(inspireid) == 1:
                 inspireid = inspireid[0]
-                run_sql("INSERT INTO doi2inspireid(doi, inspireid, creation_date) VALUES(%s, %s, NOW())", (doi, inspireid))
+                try:
+                    run_sql("INSERT INTO doi2inspireid(doi, inspireid, creation_date) VALUES(%s, %s, NOW())", (doi, inspireid))
+                except IntegrityError, err:
+                    other_doi = run_sql("SELECT doi FROM doi2inspireid WHERE inspireid=%s", (inspireid, ))[0][0]
+                    record.warn("This record with doi %s is connected with INSPIRE id %s which is already connected to doi %s" % (doi, inspireid, other_doi))
+                    continue
             else:
                 record.warn("More than one inspire ID matches this record: %s" % inspireid)
                 continue
