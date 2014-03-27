@@ -20,8 +20,7 @@ configs = contrast_out_config.py springer_config.py oup_config.py
 templates = websearch_templates_scoap3.py webstyle_templates_scoap3.py webinterface_layout.py
 utils = jats_utils.py minidom_utils.py nlm_utils.py app_utils.py rawtext_search.py
 bibtasklets = bst_springer.py bst_elsevier.py bst_oxford.py bst_doi_timestamp.py bst_fix_ffts.py
-bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py chk_add_inspireid.py
-bibcheck_rules = rules.cfg
+bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py chk_add_inspireid.py compliance_check.py
 bibexport_config = sitemap.cfg
 bibformat_elements = bfe_publi_info.py
 bibformat_templates = Default_HTML_actions.bft Default_HTML_detailed.bft Default_HTML_brief.bft
@@ -53,7 +52,6 @@ install:
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(utils)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibsched_tasklets $(bibtasklets)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibcheck_plugins $(bibcheck_plugins)
-	$(INSTALL) -t $(ETCDIR)/bibcheck $(bibcheck_rules)
 	$(INSTALL) -t $(ETCDIR)/bibformat/format_templates $(bibformat_templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibformat_elements $(bibformat_elements)
 	$(INSTALL) -t $(ETCDIR)/bibexport $(bibexport_config)
