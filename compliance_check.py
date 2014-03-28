@@ -108,6 +108,6 @@ def check_records(records, empty=False):
                                    'Checking compliance.')
         else:
             for key, value in dic.iteritems():
-                record.add_field('59__a',
+                record.add_field('591__a',
                                  value="",
                                  subfields=[('a', '%s:%d' % (key, value))])
