@@ -29,6 +29,8 @@ def index(req):
 
     req.write("<h2>National statistics</h2>")
     req.write("<a href='/nations.py'>Countries impact</a> - number of pulications per country<br />")
+    req.write("<a href='/nations.py/us_affiliations'>US affiliations</a> - all US affiliations<br />")
+    req.write("<a href='/nations.py/us_affiliations_csv'>Selected US aff count</a> - affiliation count for selected US universities<br />")
 
     req.write("<h2>Export to INSPIRE</h2>")
     req.write("<a href='/ffts_for_inspire.py'>Data export</a><br />")
