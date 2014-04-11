@@ -62,13 +62,13 @@ def get_authors_searchterm():
                     'societa italiana di fisica'
                     ]
 
-    copyright_list = ['copyright ',
+    copyright_list = ['^copyright ',
                       ' copyright ',
-                      'c ',
+                      '^c ',
                       ' c ',
-                      '\(c\) ',
+                      '^\(c\) ',
                       ' \(c\) ',
-                      '© ',
+                      '^© ',
                       ' © '
                       ]
 
