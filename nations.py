@@ -107,20 +107,17 @@ CFG_JOURNALS = ['Acta',
 
 CFG_SELECTED_AFF = {'Andrews University': ('Andrews University',),
                     'Arkansas State University': ('Arkansas State University',),
-                    'Auburn University': ('Auburn University',),
                     'Black Hills State University': ('Black Hills State University',),
                     'Boise State University': ('Boise State University',),
                     'Brookhaven National Laboratory': ('Brookhaven National Laboratory',),
                     'Brown University': ('Brown University',),
                     'Chicago State University': ('Chicago State University',),
-                    'Colorado State University': ('Colorado State University',),
                     'Columbia University': ('Columbia University',),
                     'Creighton University': ('Creighton University',),
                     'Fairfield University': ('Fairfield University',),
                     'George Washington University': ('George Washington University',),
                     'Hampton University': ('Hampton University',),
                     'Houston Advanced Research Center': ('Houston Advanced Research Center',),
-                    'Howard University': ('howard university',),
                     'Janelia Farm Research Campus': ('Janelia Farm Research Campus',),
                     'Long Island University': ('Long Island University',),
                     'Louisiana Tech University': ('Louisiana Tech University',),
@@ -133,18 +130,14 @@ CFG_SELECTED_AFF = {'Andrews University': ('Andrews University',),
                     'North Carolina Central University': ('North Carolina Central University',),
                     'Northern Illinois University': ('Northern Illinois University',),
                     'Oklahoma State University': ('Oklahoma State University',),
-                    'Oklahoma State': ('Oklahoma State',),
                     'Pacific Lutheran University': ('Pacific Lutheran University',),
                     'Philander Smith College': ('Philander Smith College',),
                     'Rutgers University': ('Rutgers University',),
-                    'Rutgers': ('Rutgers University',),
                     'South Dakota School of Mines and Technology': ('South Dakota School of Mines and Tec',),
-                    'Southern Illinois University Carbondale': ('southern illinois university', 'carbondale'),
                     'Stanford University': ('Stanford University',),
                     'State University of New York (or SUNY) Albany': ('SUNY Albany', 'University at Albany (SUNY)', 'Albany'),
                     'State University of New York (or SUNY) Buffalo': ('University at Buffalo', 'State University of New York at Buffalo'),
                     'Syracuse University': ('Syracuse University',),
-                    'Techas Tech University': ('texas tech',),
                     'Tennessee Tech University': ('Tennessee Tech University',),
                     'Texas Tech University': ('Texas Tech University',),
                     'The George Washington University': ('The George Washington University',),
@@ -154,11 +147,8 @@ CFG_SELECTED_AFF = {'Andrews University': ('Andrews University',),
                     'The University of Mississippi': ('The University of Mississippi',),
                     'Triangle Universities Nuclear Laboratory': ('Triangle Universities Nuclear Laboratory',),
                     'University of Connecticut': ('University of Connecticut',),
-                    'University of Delaware': ('University of Delaware',),
-                    'University of Hawaii': ('university of hawaii',),
                     'University of Hawaii': ('University of Hawaii',),
                     'University of Houston': ('University of Houston',),
-                    'University of Louisville': ('University of Luisville',),
                     'University of Puerto Rico': ('University of Puerto Rico',),
                     'University of South Dakota': ('University of South Dakota',),
                     'Utah Valley University': ('Utah Valley University',),
@@ -313,17 +303,17 @@ def us_affiliations(req):
 def us_affiliations_csv(req):
     req.content_type = 'text/csv; charset=utf-8'
     req.headers_out['content-disposition'] = 'attachment; filename=us_aff.csv'
-    header = ','.join(['University'] + [get_coll_i18nname(journal) for journal in CFG_JOURNALS] + ['sum'])
+    header = ';'.join(['University'] + [get_coll_i18nname(journal) for journal in CFG_JOURNALS] + ['sum'])
     print >> req, header
-    for university in CFG_SELECTED_AFF:
+    for university in sorted(CFG_SELECTED_AFF):
         line = university
         count = 0
         search = create_search_from_affiliation(university)
         for collection in CFG_JOURNALS:
             res = perform_request_search(p='/%s/' % (search,), c=collection)
-            line = line + "," + str(len(res))
+            line = line + ";" + str(len(res))
             count = count + len(res)
-        print >> req, line+","+str(count)
+        print >> req, line+";"+str(count)
 
 
 def usa_papers(req):
