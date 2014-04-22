@@ -33,6 +33,7 @@ from xml.dom.minidom import parse
 
 from invenio.errorlib import register_exception
 from invenio.bibrecord import record_add_field, record_xml_output
+from invenio.bibdocfile import BibRecDocs
 from invenio.config import (CFG_TMPSHAREDDIR, CFG_ETCDIR,
                             CFG_CONTRASTOUT_DOWNLOADDIR)
 from invenio.shellutils import run_shell_command
@@ -45,6 +46,7 @@ from invenio.contrast_out_utils import find_package_name
 from invenio.minidom_utils import (get_value_in_tag,
                                    xml_to_text,
                                    format_arxiv_id)
+from invenio.bibdocfile import BibRecDocs
 CFG_SCOAP3DTDS_PATH = join(CFG_ETCDIR, 'scoap3dtds')
 
 CFG_ELSEVIER_ART501_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art501.zip')
@@ -409,6 +411,18 @@ class ElsevierPackage(object):
             register_exception(alert_admin=True, prefix="Elsevier paper: %s is missing PDF." % (doi,))
             self.logger.warning("Record %s doesn't contain PDF file." % (doi,))
 
+        ## copy other formats to bibupload file
+        if recid:
+            record = BibRecDocs(recid[0])
+            for bibfile in record.list_latest_files():
+                if bibfile.get_format() != '.pdf;pdfa':
+                    record_add_field(rec,
+                                     'FFT',
+                                     subfields=[('a', bibfile.get_full_path()),
+                                                ('n', bibfile.get_name()),
+                                                ('f', bibfile.get_format())]
+                                     )
+
         return record_xml_output(rec)
 
     def get_record(self, path=None, no_pdf=False):
@@ -545,7 +559,7 @@ class ElsevierPackage(object):
                         print path, i + 1, "out of", len(self.found_articles)
                 print >> out, "</collection>"
                 out.close()
-                task_low_level_submission("bibupload", "admin", "-N", "Elsevier:VTEX", "-a", name_vtex)
+                task_low_level_submission("bibupload", "admin", "-N", "Elsevier:VTEX", "-c", name_vtex)
 
 
 def main():
