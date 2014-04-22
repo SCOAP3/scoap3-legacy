@@ -45,6 +45,7 @@ from invenio.contrast_out_utils import find_package_name
 from invenio.minidom_utils import (get_value_in_tag,
                                    xml_to_text,
                                    format_arxiv_id)
+from invenio.bibdocfile import BibRecDocs
 CFG_SCOAP3DTDS_PATH = join(CFG_ETCDIR, 'scoap3dtds')
 
 CFG_ELSEVIER_ART501_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art501.zip')
@@ -545,7 +546,7 @@ class ElsevierPackage(object):
                         print path, i + 1, "out of", len(self.found_articles)
                 print >> out, "</collection>"
                 out.close()
-                task_low_level_submission("bibupload", "admin", "-N", "Elsevier:VTEX", "-a", name_vtex)
+                task_low_level_submission("bibupload", "admin", "-N", "Elsevier:VTEX", "-c", name_vtex)
 
 
 def main():
