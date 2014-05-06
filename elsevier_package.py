@@ -33,6 +33,7 @@ from xml.dom.minidom import parse
 
 from invenio.errorlib import register_exception
 from invenio.bibrecord import record_add_field, record_xml_output
+from invenio.bibdocfile import BibRecDocs
 from invenio.config import (CFG_TMPSHAREDDIR, CFG_ETCDIR,
                             CFG_CONTRASTOUT_DOWNLOADDIR)
 from invenio.shellutils import run_shell_command
@@ -409,6 +410,18 @@ class ElsevierPackage(object):
         except MissingFFTError, err:
             register_exception(alert_admin=True, prefix="Elsevier paper: %s is missing PDF." % (doi,))
             self.logger.warning("Record %s doesn't contain PDF file." % (doi,))
+
+        ## copy other formats to bibupload file
+        if recid:
+            record = BibRecDocs(recid[0])
+            for bibfile in record.list_latest_files():
+                if bibfile.get_format() != '.pdf;pdfa':
+                    record_add_field(rec,
+                                     'FFT',
+                                     subfields=[('a', bibfile.get_full_path()),
+                                                ('n', bibfile.get_name()),
+                                                ('f', bibfile.get_format())]
+                                     )
 
         return record_xml_output(rec)
 
