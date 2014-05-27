@@ -16,12 +16,16 @@ from invenio.bibdocfile import BibRecDocs
 from invenio.rawtext_search import RawTextSearch
 
 
-JOURNALS_PDFA = {'ELS/NPB': 'nuclphysb', 'ELS/PLB': 'physletb',
-                 'SPR/EPJC': 'epjc', 'SPR/JHEP': 'JHEP02',
-                 'HIN/AHEP': '10.1155', 'OUP/PTEP': 'ptep'}
-JOURNALS_NO_PDFA = {'IOP/CPC': '1674-1137', 'IOP/JCAP': '1475-7516',
-                    'IOP/NJP': '1367-2630'}
-JOURNALS_NO_XML = {'JAG/ACTA': 'APhysPolB'}
+JOURNALS_PDFA = {'ELS/NPB': 'Nuclear Physics B',
+                 'ELS/PLB': 'Physics Letters B',
+                 'SPR/EPJC': 'European Physical Journal C',
+                 'SPR/JHEP': 'Journal of High Energy Physics',
+                 'HIN/AHEP': 'Advances in High Energy Physics',
+                 'OUP/PTEP': 'Progress of Theoretical and Experimental Physics'}
+JOURNALS_NO_PDFA = {'IOP/CPC': 'Chinese Physics C',
+                    'IOP/JCAP': 'Journal of Cosmology and Astroparticle Physics',
+                    'IOP/NJP': 'New Journal of Physics'}
+JOURNALS_NO_XML = {'JAG/ACTA': 'Acta'}
 
 compliance_check_values = {}
 
@@ -445,9 +449,10 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
 
     for key in journal_list:
         val = dictionary[key]
-        papers = perform_request_search(p="date%s:%s->%s 024:'%s'"
+        papers = perform_request_search(p="date%s:%s->%s"
                                         % (created_or_modified_date,
-                                           f_date, t_date, val,))
+                                           f_date, t_date),
+                                        c=val)
 
         if papers == []:
             continue
