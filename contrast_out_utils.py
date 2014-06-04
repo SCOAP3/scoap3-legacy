@@ -9,13 +9,14 @@ def contrast_out_cmp(x, y):
             val = val.split('_')[0]
             val = val.strip("vtex")
         else:
-            for w in ["CERN", "P", "S", "Q", "AB", "J"]:
-                if w is not "CERN" and w in val:
+            val = val[4:]
+            for w in ["P", "S", "Q", "AB", "J", "R"]:
+                if w in val:
                     if w is "P":
                         val_type = 1
                     if w is "Q":
                         val_type = 2
-                    if w is "S":
+                    if w in ["S", "R"]:
                         val_type = 3
                     if w is "AB":
                         val_type = 4
@@ -27,6 +28,8 @@ def contrast_out_cmp(x, y):
 
     x_number, x_type, x_vtex = get_val_type(x)
     y_number, y_type, y_vtex = get_val_type(y)
+    print x, x_type
+    print y, y_type
 
     if x_vtex or y_vtex:
         if x_vtex and not y_vtex:
