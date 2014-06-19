@@ -2,14 +2,12 @@ import sys
 import time
 from socket import timeout as socket_timeout_exception
 
-from datetime import datetime
-from functools import partial
 from ftplib import FTP
 from os import listdir
 from os.path import join, walk
 from tarfile import TarFile
 from tempfile import mkdtemp
-from xml.dom.minidom import parseString, parse
+from xml.dom.minidom import parse
 from zipfile import ZipFile
 
 from contrast_out_config import *
@@ -18,11 +16,11 @@ from invenio.scoap3utils import (MD5Error,
                                  NoNewFiles,
                                  FileTypeError,
                                  progress_bar,
-                                 check_pkgs_integrity)
+                                 check_pkgs_integrity,
+                                 extract_package as scoap3utils_extract_package)
 from invenio.contrast_out_utils import (contrast_out_cmp,
                                         find_package_name)
-from invenio.minidom_utils import (xml_to_text,
-                                   get_value_in_tag)
+from invenio.minidom_utils import (xml_to_text,)
 from invenio.errorlib import register_exception
 
 CFG_READY_PACKAGES = join(CFG_CONTRASTOUT_DOWNLOADDIR, "ready_pkgs")
@@ -183,17 +181,7 @@ class ContrastOutConnector(object):
         """
         self.path_unpacked = mkdtemp(prefix="scoap3_package_", dir=CFG_TMPSHAREDDIR)
         for path in self.retrieved_packages_unpacked:
-            try:
-                if ".tar" in path:
-                    TarFile.open(path).extractall(self.path_unpacked)
-                elif ".zip" in path:
-                    ZipFile(path).extractall(self.path_unpacked)
-                else:
-                    raise FileTypeError("It's not a TAR or ZIP archive.")
-            except Exception, err:
-                register_exception(alert_admin=True, prefix="Elsevier error extracting package.")
-                self.logger.error("Error extraction package file: %s %s" % (path,err))
-                print >> sys.stdout, "\nError extracting package file: %s %s" % (path, err)
+            scoap3utils_extract_package(path, self.path_unpacked, self.logger)
 
         return self.path_unpacked
 

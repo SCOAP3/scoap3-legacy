@@ -26,17 +26,12 @@ from __future__ import division
 import sys
 import time
 import logging
-import urllib
-import itertools
-import datetime
-from xml.dom.minidom import parse
+from invenio.config import CFG_LOGDIR
 
-from invenio.search_engine import get_collection_reclist, get_record
-from invenio.config import CFG_LOGDIR, CFG_CROSSREF_USERNAME, CFG_CROSSREF_PASSWORD, CFG_SITE_NAME
-from invenio.dbquery import run_sql
-from invenio.intbitset import intbitset
-from invenio.bibrecord import record_extract_dois, record_get_field_values
 from os.path import join
+from tarfile import TarFile
+from zipfile import ZipFile
+from invenio.errorlib import register_exception
 
 CFG_CROSSREF_DOIS_PER_REQUEST = 10
 CFG_CROSSREF_API_URL = "http://doi.crossref.org/search/doi?"
@@ -124,6 +119,7 @@ CFG_CROSSREF_API_URL = "http://doi.crossref.org/search/doi?"
                     #ret[doi] = datetime.datetime.strptime(xml_to_text(crm_item), "%Y%m%d%H%M%S%f")
                     #break
     #return ret
+
 
 def lock_issue():
     """
@@ -215,3 +211,17 @@ def check_pkgs_integrity(filelist, logger, ftp_connector, timeout=120, sleep_tim
 
         print >> sys.stdout, "\nOMG, OMG something wrong with integrity."
         logger.error("Integrity check faild for files %s" % (not_finished_files,))
+
+
+def extract_package(path, package_name, logger):
+    try:
+        if ".tar" in package_name:
+            TarFile.open(package_name).extractall(path)
+        elif ".zip" in package_name:
+            ZipFile(package_name).extractall(path)
+        else:
+            raise FileTypeError("It's not a TAR or ZIP archive.")
+    except Exception, err:
+        register_exception(alert_admin=True, prefix="Elsevier error extracting package.")
+        logger.error("Error extraction package file: %s %s" % (path, err))
+        print >> sys.stdout, "\nError extracting package file: %s %s" % (path, err)
