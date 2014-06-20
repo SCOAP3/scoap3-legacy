@@ -21,34 +21,27 @@ import re
 import time
 import sys
 import traceback
-import time
-from datetime import datetime
 from os import listdir, rename, fdopen
 from os.path import join, exists, walk
-from tarfile import TarFile
+
 from tempfile import mkdtemp, mkstemp
-from urllib import urlretrieve
 from zipfile import ZipFile
 from xml.dom.minidom import parse
 
 from invenio.errorlib import register_exception
 from invenio.bibrecord import record_add_field, record_xml_output
-from invenio.bibdocfile import BibRecDocs
-from invenio.config import (CFG_TMPSHAREDDIR, CFG_ETCDIR,
-                            CFG_CONTRASTOUT_DOWNLOADDIR)
 from invenio.shellutils import run_shell_command
 from invenio.bibtask import task_low_level_submission
 from invenio.scoap3utils import (create_logger,
-                                 progress_bar,
                                  MissingFFTError,
-                                 FileTypeError)
+                                 extract_package as scoap3utils_extract_package)
 from invenio.contrast_out_utils import find_package_name
 from invenio.minidom_utils import (get_value_in_tag,
                                    xml_to_text,
                                    format_arxiv_id)
-from invenio.bibdocfile import BibRecDocs
-CFG_SCOAP3DTDS_PATH = join(CFG_ETCDIR, 'scoap3dtds')
+from invenio.config import (CFG_ETCDIR, CFG_TMPSHAREDDIR)
 
+CFG_SCOAP3DTDS_PATH = join(CFG_ETCDIR, 'scoap3dtds')
 CFG_ELSEVIER_ART501_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art501.zip')
 CFG_ELSEVIER_ART510_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art510.zip')
 CFG_ELSEVIER_ART520_PATH = join(CFG_SCOAP3DTDS_PATH, 'ja5_art520.zip')
@@ -104,17 +97,7 @@ class ElsevierPackage(object):
         """
         self.path = mkdtemp(prefix="scoap3_package_", dir=CFG_TMPSHAREDDIR)
         self.logger.debug("Extracting package: %s" % (self.package_name,))
-        try:
-            if ".tar" in self.package_name:
-                TarFile.open(self.package_name).extractall(self.path)
-            elif ".zip" in self.package_name:
-                ZipFile(self.package_name).extractall(self.path)
-            else:
-                raise FileTypeError("It's not a TAR or ZIP archive.")
-        except Exception, err:
-            register_exception(alert_admin=True, prefix="Elsevier error extracting package.")
-            self.logger.error("Error extraction package file: %s %s" % (self.path, err))
-            print >> sys.stdout, "\nError extracting package file: %s %s" % (self.path, err)
+        scoap3utils_extract_package(self.path, self.package_name, self.logger)
 
     def _crawl_elsevier_and_find_main_xml(self):
         """
