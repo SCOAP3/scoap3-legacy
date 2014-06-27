@@ -3,23 +3,15 @@ LIBDIR = $(PREFIX)/lib
 ETCDIR = $(PREFIX)/etc
 WWWDIR = $(PREFIX)/var/www
 APACHE = `python -c "from invenio.bibtask import guess_apache_process_user; print guess_apache_process_user()"`
-# APACHE = www-data
-# APACHE = wziolek
+#APACHE = www-data
+#APACHE = wojciech
 INSTALL = install -g $(APACHE)
 
-scoap3dtdsdir = $(ETCDIR)/scoap3dtds
-scoap3dtds_DATA = ja5_art501.zip ja5_art510.zip ja5_art520.zip si510.zip si520.zip A++V2.4.zip jats-archiving-dtd-1.0.zip journal-publishing-dtd-2.3.zip
-
-scoap3utils = scoap3utils.py
 scoap3tests = scoap3_unit_tests.py
-contrast_out = contrast_out.py
-contrast_out_utils = contrast_out_utils.py
-pkg = elsevier_package.py springer_package.py oup_package.py
-hindawi_bibfilter = hindawi_bibfilter.py
 configs = contrast_out_config.py springer_config.py oup_config.py
 templates = websearch_templates_scoap3.py webstyle_templates_scoap3.py webinterface_layout.py
-utils = jats_utils.py minidom_utils.py nlm_utils.py app_utils.py rawtext_search.py
-bibtasklets = bst_springer.py bst_elsevier.py bst_oxford.py bst_doi_timestamp.py bst_fix_ffts.py
+utils = rawtext_search.py
+bibtasklets = bst_doi_timestamp.py bst_fix_ffts.py
 bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py chk_add_inspireid.py compliance_check.py
 bibexport_config = sitemap.cfg
 bibformat_elements = bfe_publi_info.py
@@ -39,18 +31,10 @@ oxford_unpacked_files = $(PREFIX)/var/data/scoap3/oxford/unpacked_files
 
 
 install:
-	$(INSTALL) -d $(scoap3dtdsdir)
-	$(INSTALL) -t $(scoap3dtdsdir) $(scoap3dtds_DATA)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(scoap3utils)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(scoap3tests)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(contrast_out)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(contrast_out_utils)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(pkg)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(configs)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(hindawi_bibfilter)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(utils)
-	$(INSTALL) -t $(LIBDIR)/python/invenio/bibsched_tasklets $(bibtasklets)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibcheck_plugins $(bibcheck_plugins)
 	$(INSTALL) -t $(ETCDIR)/bibformat/format_templates $(bibformat_templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibformat_elements $(bibformat_elements)
