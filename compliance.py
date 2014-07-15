@@ -11,6 +11,7 @@ from invenio.search_engine import (perform_request_search,
                                    get_record,
                                    get_collection_reclist)
 from invenio.bibdocfile import BibRecDocs
+from invenio.dbquery import run_sql
 
 
 from invenio.rawtext_search import RawTextSearch
@@ -280,6 +281,10 @@ def get_record_checks(req, recids):
                 <th>CC-BY</th>
                 <th>Funded by SCOAP3</th>
                 <th>notes</th>
+                <th>First delivery</th>
+                <th>Last modification</th>
+                <th>PDF/A upl.</th>
+                <th>DOI registration</th>
             </tr>""")
     return ''.join(return_val)
 
@@ -442,6 +447,31 @@ def index(req):
     req.flush()
 
 
+def get_delivery_of_firts_ab_package(data):
+    delivery_date = None
+    for delivery in data:
+        if 'CERNAB' in delivery['pkg_name']:
+            delivery_date = delivery['pkg_delivery']
+            break
+    return delivery_date
+
+
+def get_delivery_of_firts_pdfa(data):
+    delivery_date = None
+    for delivery in data:
+        if 'vtex' in delivery['pkg_name']:
+            delivery_date = delivery['pkg_delivery']
+            break
+    return delivery_date
+
+
+def check_24h_delivery(time, doi_reg):
+    if time:
+        return str(time-doi_reg)
+    else:
+        return 'None'
+
+
 def write_csv(req, dictionary, journal_list, f_date, t_date,
               created_or_modified_date):
 
@@ -458,16 +488,27 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
             continue
 
         return_val += key
-        return_val += ','.join(['recid', 'cr. date', 'mod. date', 'DOI',
+        return_val += ';'.join(['recid', 'cr. date', 'mod. date', 'DOI',
                                 'XML', 'PDF', 'PDF/A', 'Complete record?',
                                 'arXiv number', 'Copyright: authors', 'CC-BY',
-                                'Funded by SCOAP3', 'notes']) + '\n'
+                                'Funded by SCOAP3', 'notes', 'First delivery',
+                                'First AB delivery', 'Last modification',
+                                'PDF/A upload', 'DOI registration',
+                                'Delivery diff', 'PDF/A diff']) + '\n'
 
         for recid in papers:
             rec = get_record(recid)
             doi = get_doi(rec)
+            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package JOIN doi ON doi_package.doi=doi.doi JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
+            if delivery_data:
+                first_del = delivery_data[0]['pkg_delivery']
+                first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
+                last_mod = delivery_data[-1]['pkg_delivery']
+                doi_reg = delivery_data[0]['doi_reg']
+                pdfa_del = get_delivery_of_firts_pdfa(delivery_data)
+
             record_compl = is_complete_record(recid)
-            return_val += ','.join(str(item) for item in [str(recid),
+            return_val += ';'.join(str(item) for item in [str(recid),
                                    get_creation_date(recid),
                                    get_modification_date(recid),
                                    doi,
@@ -479,7 +520,15 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
                                    is_compliant(recid, 'authors').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'cc').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'scoap3').lstrip('<b>').rstrip('</b>'),
-                                   str([rec_key for rec_key, rec_val in record_compl.iteritems() if not rec_val])])
+                                   str([rec_key for rec_key, rec_val in record_compl.iteritems() if not rec_val]),
+                                   str(first_del),
+                                   str(first_ab_del),
+                                   str(last_mod),
+                                   str(pdfa_del),
+                                   str(doi_reg),
+                                   check_24h_delivery(first_ab_del, doi_reg),
+                                   check_24h_delivery(pdfa_del, doi_reg)
+                                   ])
             return_val += '\n'
 
     return return_val

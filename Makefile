@@ -36,6 +36,7 @@ install:
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(utils)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibcheck_plugins $(bibcheck_plugins)
+	$(INSTALL) -t $(LIBDIR)/python/invenio/bibsched_tasklets $(bibtasklets)
 	$(INSTALL) -t $(ETCDIR)/bibformat/format_templates $(bibformat_templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibformat_elements $(bibformat_elements)
 	$(INSTALL) -t $(ETCDIR)/bibexport $(bibexport_config)
