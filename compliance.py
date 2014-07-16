@@ -1,9 +1,7 @@
-from invenio.webpage import pagefooteronly, pageheaderonly, page
 from invenio.config import CFG_SITE_URL
 from os.path import join
-from cgi import escape
-from urllib import urlencode
 from time import strftime
+from datetime import timedelta
 
 from invenio.search_engine import (perform_request_search,
                                    get_creation_date,
@@ -12,9 +10,7 @@ from invenio.search_engine import (perform_request_search,
                                    get_collection_reclist)
 from invenio.bibdocfile import BibRecDocs
 from invenio.dbquery import run_sql
-
-
-from invenio.rawtext_search import RawTextSearch
+import traceback
 
 
 JOURNALS_PDFA = {'ELS/NPB': 'Nuclear Physics B',
@@ -193,9 +189,10 @@ def get_recids(req, dictionary, journal_list, f_date, t_date,
                created_or_modified_date, result):
     for key in journal_list:
         val = dictionary[key]
-        papers = perform_request_search(p="date%s:%s->%s 024:'%s'"
+        papers = perform_request_search(p="date%s:%s->%s"
                                         % (created_or_modified_date,
-                                           f_date, t_date, val,))
+                                           f_date, t_date),
+                                        c=val)
 
         if len(papers) != 0:
             result.extend([key])
@@ -234,6 +231,20 @@ def get_record_checks(req, recids):
             recid = int(rid)
             rec = get_record(recid)
             doi = get_doi(rec)
+            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package JOIN doi ON doi_package.doi=doi.doi JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC",
+                                    (doi,),
+                                    with_dict=True)
+            first_del = None
+            first_ab_del = None
+            last_mod = None
+            doi_reg = None
+            pdfa_del = None
+            if delivery_data:
+                first_del = delivery_data[0]['pkg_delivery']
+                first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
+                last_mod = delivery_data[-1]['pkg_delivery']
+                doi_reg = delivery_data[0]['doi_reg']
+                pdfa_del = get_delivery_of_firts_pdfa(delivery_data)
             record_compl = is_complete_record(recid)
             return_val.append("""<tr>
                 <td><a href="%s">%i</a></td>
@@ -249,6 +260,13 @@ def get_record_checks(req, recids):
                 <td>%s</td>
                 <td>%s</td>
                 <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td>%s</td>
+                <td %s>%s</td>
+                <td %s>%s</td>
             </tr>""" % (join(CFG_SITE_URL, 'record', str(recid)), recid,
                         get_creation_date(recid),
                         get_modification_date(recid),
@@ -262,8 +280,18 @@ def get_record_checks(req, recids):
                         is_compliant(recid, "cc"),
                         is_compliant(recid, "scoap3"),
                         str([rec_key for rec_key, rec_val
-                             in record_compl.iteritems() if not rec_val])))
+                             in record_compl.iteritems() if not rec_val]),
+                        str(first_del),
+                        str(first_ab_del),
+                        str(last_mod),
+                        str(pdfa_del),
+                        str(doi_reg),
+                        format_24h_delivery(check_24h_delivery(first_del, doi_reg)),
+                        check_24h_delivery(first_del, doi_reg),
+                        format_24h_delivery(check_24h_delivery(pdfa_del, doi_reg)),
+                        check_24h_delivery(pdfa_del, doi_reg)))
         except:
+            traceback.print_exc()
             recid = rid
             return_val.append("""<tr><th colspan="13" align="left">
                                <h2>%s</h2></th></tr>""" % (recid,))
@@ -282,9 +310,12 @@ def get_record_checks(req, recids):
                 <th>Funded by SCOAP3</th>
                 <th>notes</th>
                 <th>First delivery</th>
+                <th>First AB delivery</th>
                 <th>Last modification</th>
-                <th>PDF/A upl.</th>
+                <th>PDF/A upload</th>
                 <th>DOI registration</th>
+                <th>Delivery diff</th>
+                <th>PDF/A diff</th>
             </tr>""")
     return ''.join(return_val)
 
@@ -467,9 +498,16 @@ def get_delivery_of_firts_pdfa(data):
 
 def check_24h_delivery(time, doi_reg):
     if time:
-        return str(time-doi_reg)
+        return time-doi_reg
     else:
-        return 'None'
+        return None
+
+
+def format_24h_delivery(data):
+    if data:
+        if data > timedelta(1):
+            return 'style="background-color:red;"'
+    return ''
 
 
 def write_csv(req, dictionary, journal_list, f_date, t_date,
@@ -499,6 +537,11 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
         for recid in papers:
             rec = get_record(recid)
             doi = get_doi(rec)
+            first_del = None
+            first_ab_del = None
+            last_mod = None
+            doi_reg = None
+            pdfa_del = None
             delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package JOIN doi ON doi_package.doi=doi.doi JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
             if delivery_data:
                 first_del = delivery_data[0]['pkg_delivery']

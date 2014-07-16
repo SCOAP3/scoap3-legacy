@@ -33,7 +33,7 @@ import traceback
 def prepare_package_table():
     return run_sql("""CREATE TABLE IF NOT EXISTS package (
         id mediumint NOT NULL AUTO_INCREMENT,
-        name varchar(255) NOT NULL,
+        name varchar(255) NOT NULL UNIQUE,
         delivery_date datetime NOT NULL,
         PRIMARY KEY doi(id),
         KEY (name)
