@@ -8,7 +8,6 @@ APACHE = `python -c "from invenio.bibtask import guess_apache_process_user; prin
 INSTALL = install -g $(APACHE)
 
 scoap3tests = scoap3_unit_tests.py
-configs = contrast_out_config.py springer_config.py oup_config.py
 templates = websearch_templates_scoap3.py webstyle_templates_scoap3.py webinterface_layout.py
 utils = rawtext_search.py
 bibtasklets = bst_doi_timestamp.py bst_fix_ffts.py
@@ -32,7 +31,6 @@ oxford_unpacked_files = $(PREFIX)/var/data/scoap3/oxford/unpacked_files
 
 install:
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(scoap3tests)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(configs)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(utils)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibcheck_plugins $(bibcheck_plugins)
