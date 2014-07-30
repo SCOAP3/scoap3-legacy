@@ -6,11 +6,12 @@ APACHE = `python -c "from invenio.bibtask import guess_apache_process_user; prin
 #APACHE = www-data
 #APACHE = wojciech
 INSTALL = install -g $(APACHE)
+COPYDIR = cp -r
 
 scoap3tests = scoap3_unit_tests.py
-configs = contrast_out_config.py springer_config.py oup_config.py
+compliance_configs = compliance_check_configs
 templates = websearch_templates_scoap3.py webstyle_templates_scoap3.py webinterface_layout.py
-utils = rawtext_search.py
+utils = rawtext_search.py utils.py NonComplianceCheck.py
 bibtasklets = bst_doi_timestamp.py bst_fix_ffts.py
 bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py chk_add_inspireid.py compliance_check.py chk_fix_latex.py chk_find_erratum.py
 bibexport_config = sitemap.cfg
@@ -32,7 +33,6 @@ oxford_unpacked_files = $(PREFIX)/var/data/scoap3/oxford/unpacked_files
 
 install:
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(scoap3tests)
-	$(INSTALL) -t $(LIBDIR)/python/invenio $(configs)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(utils)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibcheck_plugins $(bibcheck_plugins)
@@ -53,6 +53,8 @@ install:
 	$(INSTALL) -d $(oxford_data_files)
 	$(INSTALL) -d $(oxford_tar_files)
 	$(INSTALL) -d $(oxford_unpacked_files)
+
+	$(COPYDIR)    $(compliance_configs) $(LIBDIR)/python/invenio/bibcheck_plugins
 
 install-conf:
 	$(INSTALL) -t $(ETCDIR) invenio-local.conf
