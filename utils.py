@@ -62,24 +62,6 @@ def add_fields(record, field, subfield, value_dict):
                          subfields=[(subfield, '%s:%d' % (key, value))])
 
 
-def has_field(rec, field, subfield):
-
-    def _has_field(field, subfield):
-        if subfield == field:
-            return True
-
-        if isinstance(field, Iterable) \
-           and not isinstance(field, basestring):
-            return any([_has_field(x, subfield) for x in field])
-
-        return False
-
-    try:
-        return _has_field(rec[field], subfield)
-    except KeyError:
-        return False
-
-
 #GENERAL
 def get_filenames_from_directory(dirname, _filter=''):
     return [join(dirname, f) for f in listdir(dirname)

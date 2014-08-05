@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-import collections
-from invenio.utils import flatten_list, has_field
-
-RECORD_FIELD = '700'
-RECORD_SUBFIELD = 'z'
-
 NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Argentina": "Argentina",
                        "Armenia": "Armenia",
@@ -20,7 +14,6 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Brazil": "Brazil",
                        "Bulgaria": "Bulgaria",
                        "Canada": "Canada",
-                       "CERN": "CERN",
                        "Chile": "Chile",
                        ##########CHINA########
                        "China (PRC)": "China",
@@ -131,47 +124,37 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Jordan": "Jordan"}
 
 
-def _find_field(rec):
-    def closure((field, subfield)):
-        try:
-            return [f for f in rec[field][0][0] if subfield in f]
-        except KeyError:
-            return None
+def find_nations(field, subfields):
+    all_aff_string = ''
+    for x in field:
+        if x[0] in subfields:
+            all_aff_string += x[1] + ', '
 
-    return closure
+    all_aff = [x.replace('.', '') for x in all_aff_string.split(', ')]
+
+    return map(NATIONS_DEFAULT_MAP.get,
+               filter(lambda x: x in all_aff, NATIONS_DEFAULT_MAP.keys()))
 
 
-def find_nations(rec):
-
-    possible_fields = map(_find_field(rec), [('700', 'v'),
-                                             ('700', 'u'),
-                                             ('100', 'v'),
-                                             ('100', 'u')])
-
-    possible_fields = filter(lambda x: x is not None, possible_fields)
-
-    _all = []
-    for s in flatten_list(possible_fields):
-        _all.extend([x.replace('.', '') for x in s.split(', ')])
-
-    result = map(NATIONS_DEFAULT_MAP.get,
-                 filter(lambda x: x in _all, NATIONS_DEFAULT_MAP.keys()))
-
-    return result
+def has_field(field, subfield):
+    for x in field:
+        if x[0] == subfield:
+            return True
+    return False
 
 
 def check_records(records, empty=False):
-    for record in records:
-        if not has_field(record, RECORD_FIELD, RECORD_SUBFIELD):
-            nations = find_nations(record)
-            if len(nations) == 1:
-                val = nations[0]
-            else:
-                val = 'HUMAN CHECK'
+    fields = ['100', '700']
 
-            field = '{0}__{1}'.format(RECORD_FIELD, RECORD_SUBFIELD)
-            if RECORD_FIELD in record:
-                record.add_subfield((field, 0, 0), RECORD_SUBFIELD, val)
-            else:
-                record.add_field(field, value='',
-                                 subfields=[(RECORD_SUBFIELD, val)])
+    for record in records:
+        for field in fields:
+            if field in record:
+                for i, x in enumerate(record[field]):
+                    data = x[0]
+                    if not has_field(data, 'w'):
+                        nations = find_nations(data, ['u', 'v'])
+                        if len(nations) == 1:
+                            val = nations[0]
+                        else:
+                            val = 'HUMAN CHECK'
+                        record.add_subfield((field + '__w', i, 0), 'w', val)
