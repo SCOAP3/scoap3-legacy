@@ -125,15 +125,21 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
 
 
 def find_nations(field, subfields):
-    all_aff_string = ''
+    result = []
     for x in field:
         if x[0] in subfields:
-            all_aff_string += x[1] + ', '
+            values = [x.replace('.', '') for x in x[1].split(', ')]
+            possible_affs = filter(lambda x: x is not None,
+                                   map(NATIONS_DEFAULT_MAP.get, values))
+            if len(possible_affs) == 1:
+                result.append(possible_affs[0])
+            else:
+                result.append('HUMAN CHECK')
 
-    all_aff = [x.replace('.', '') for x in all_aff_string.split(', ')]
-
-    return map(NATIONS_DEFAULT_MAP.get,
-               filter(lambda x: x in all_aff, NATIONS_DEFAULT_MAP.keys()))
+    if len(result) == 1:
+        return result[0]
+    else:
+        return 'HUMAN CHECK'
 
 
 def has_field(field, subfield):
@@ -152,9 +158,5 @@ def check_records(records, empty=False):
                 for i, x in enumerate(record[field]):
                     data = x[0]
                     if not has_field(data, 'w'):
-                        nations = find_nations(data, ['u', 'v'])
-                        if len(nations) == 1:
-                            val = nations[0]
-                        else:
-                            val = 'HUMAN CHECK'
+                        val = find_nations(data, ['u', 'v'])
                         record.add_subfield((field + '__w', i, 0), 'w', val)
