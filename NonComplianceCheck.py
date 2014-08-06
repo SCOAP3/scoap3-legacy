@@ -28,7 +28,8 @@ class NonComplianceChecks:
         for filename in files:
             publisher = self._get_publisher_from_file_name(filename)
             with open(filename, 'r') as f:
-                lines = [line.strip() for line in f.readlines()]
+                lines = filter(lambda x: x != '',
+                               [line.strip() for line in f.readlines()])
 
             tmp[publisher] = RawTextSearch(lines[0].format(*lines[1:]))
 
