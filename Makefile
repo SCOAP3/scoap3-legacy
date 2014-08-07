@@ -13,7 +13,8 @@ compliance_configs = compliance_check_configs
 templates = websearch_templates_scoap3.py webstyle_templates_scoap3.py webinterface_layout.py
 utils = rawtext_search.py utils.py NonComplianceCheck.py
 bibtasklets = bst_doi_timestamp.py bst_fix_ffts.py
-bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py chk_add_inspireid.py compliance_check.py chk_fix_latex.py chk_find_erratum.py
+bibcheck_rules = rules.cfg
+bibcheck_plugins = crossref_timestamp.py iop_issn.py iop_arxive_fix.py arxiv_prefix.py chk_add_publisher.py chk_fix_cc_by.py chk_add_inspireid.py compliance_check.py chk_fix_latex.py chk_find_erratum.py check_nations.py
 bibexport_config = sitemap.cfg
 bibformat_elements = bfe_publi_info.py
 bibformat_templates = Default_HTML_actions.bft Default_HTML_detailed.bft Default_HTML_brief.bft
@@ -35,6 +36,7 @@ install:
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(scoap3tests)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(templates)
 	$(INSTALL) -t $(LIBDIR)/python/invenio $(utils)
+	$(INSTALL) -t $(ETCDIR)/bibcheck $(bibcheck_rules)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibcheck_plugins $(bibcheck_plugins)
 	$(INSTALL) -t $(LIBDIR)/python/invenio/bibsched_tasklets $(bibtasklets)
 	$(INSTALL) -t $(ETCDIR)/bibformat/format_templates $(bibformat_templates)
