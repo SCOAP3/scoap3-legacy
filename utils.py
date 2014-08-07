@@ -1,5 +1,7 @@
 from os import listdir
-from os.path import isfile
+from os.path import (isfile, join)
+from collections import Iterable
+
 
 from invenio.search_engine import get_record
 from invenio.bibdocfile import BibRecDocs
@@ -65,6 +67,17 @@ def add_fields(record, field, subfield, value_dict):
 def get_filenames_from_directory(dirname, _filter=''):
     return [join(dirname, f) for f in listdir(dirname)
             if isfile(join(dirname, f)) and _filter in f]
+
+
+def flatten_list(l):
+    tmp = []
+    if isinstance(l, Iterable) and not isinstance(l, basestring):
+        for sl in l:
+            tmp.extend(flatten_list(sl))
+    else:
+        return [l]
+
+    return tmp
 
 
 def build_path(file_path):
