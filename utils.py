@@ -45,24 +45,6 @@ def get_rawtext_from_record_id(record_id):
     return rawtext
 
 
-def amend_fields(record, field, changes_dict, comment=''):
-    """record : AmendableRecord"""
-    for position, value in record.iterfield(field):
-        key = value[:value.find(':')]
-        if key in changes_dict:
-            record.amend_field(position,
-                               '%s:%d' % (key, changes_dict[key]),
-                               comment)
-
-
-def add_fields(record, field, subfield, value_dict):
-    """record : AmendableRecord"""
-    for key, value in value_dict.iteritems():
-        record.add_field(field,
-                         value="",
-                         subfields=[(subfield, '%s:%d' % (key, value))])
-
-
 #GENERAL
 def get_filenames_from_directory(dirname, _filter=''):
     return [join(dirname, f) for f in listdir(dirname)
