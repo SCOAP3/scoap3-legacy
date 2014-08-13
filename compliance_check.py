@@ -19,13 +19,15 @@
 
 from invenio.NonComplianceCheck import NonComplianceChecks
 from invenio.utils import amend_fields, add_fields
+from invenio.config import CFG_PYLIBDIR
+from os.path import join
 
 
 def check_records(records, empty=False):
-    path = ('/opt/invenio/lib/python/invenio/bibcheck_plugins/'
-            'compliance_check_configs/')
+    path = join(CFG_PYLIBDIR,
+                '/invenio/bibcheck_plugins/compliance_check_configs/')
     checks = NonComplianceChecks(compliance_names=['CC', 'Authors', 'SCOAP3'],
-                                 file_path=path)
+                                 files_path=path)
 
     for record in records:
         dic = checks.check(record)
