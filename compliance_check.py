@@ -18,31 +18,16 @@
 ## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 from invenio.NonComplianceCheck import NonComplianceChecks
-
-
-def amend_fields(record, field, changes_dict, comment=''):
-    """record : AmendableRecord"""
-    for position, value in record.iterfield(field):
-        key = value[:value.find(':')]
-        if key in changes_dict:
-            record.amend_field(position,
-                               '%s:%d' % (key, changes_dict[key]),
-                               comment)
-
-
-def add_fields(record, field, subfield, value_dict):
-    """record : AmendableRecord"""
-    for key, value in value_dict.iteritems():
-        record.add_field(field,
-                         value="",
-                         subfields=[(subfield, '%s:%d' % (key, value))])
+from invenio.utils import amend_fields, add_fields
+from invenio.config import CFG_PYLIBDIR
+from os.path import join
 
 
 def check_records(records, empty=False):
-    path = ('/opt/invenio/lib/python/invenio/bibcheck_plugins/'
-            'compliance_check_configs/')
+    path = join(CFG_PYLIBDIR,
+                '/invenio/bibcheck_plugins/compliance_check_configs/')
     checks = NonComplianceChecks(compliance_names=['CC', 'Authors', 'SCOAP3'],
-                                 file_path=path)
+                                 files_path=path)
 
     for record in records:
         dic = checks.check(record)

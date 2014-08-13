@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import isfile
+from invenio.bibtask import write_message
 
 from string import maketrans
 
@@ -20,7 +21,7 @@ class NonComplianceChecks:
             self._init_non_compliance_checks(compliance_name)
 
     def _get_publisher_from_file_name(self, filename):
-        return filename.replace('.cfg', '').split('_')[1]
+        return filename.replace('.cfg', '').split('/')[-1].split('_')[1]
 
     def _load_rawtext_search_from_files(self, files):
         tmp = {}
@@ -50,8 +51,11 @@ class NonComplianceChecks:
     def check(self, record):
         dic = {}
 
-        publisher = get_publisher(record.record_id)
-        rawtext = (get_rawtext_from_record_id(record.record_id)
+        try:
+            publisher = get_publisher(int(record.record_id))
+        except KeyError:
+            publisher = 'default'
+        rawtext = (get_rawtext_from_record_id(int(record.record_id))
                    .lower().translate(self._translation_table))
 
         for compliance_name in self._non_compliance_checks.keys():

@@ -3,6 +3,7 @@ from os.path import join
 from time import strftime
 from datetime import timedelta
 
+from invenio.webpage import (pagefooteronly, pageheaderonly)
 from invenio.search_engine import (perform_request_search,
                                    get_creation_date,
                                    get_modification_date,
