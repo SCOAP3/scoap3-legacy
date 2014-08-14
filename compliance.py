@@ -232,7 +232,7 @@ def get_record_checks(req, recids):
             recid = int(rid)
             rec = get_record(recid)
             doi = get_doi(rec)
-            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package JOIN doi ON doi_package.doi=doi.doi JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC",
+            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC",
                                     (doi,),
                                     with_dict=True)
             first_del = None
@@ -543,7 +543,7 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
             last_mod = None
             doi_reg = None
             pdfa_del = None
-            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package JOIN doi ON doi_package.doi=doi.doi JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
+            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
             if delivery_data:
                 first_del = delivery_data[0]['pkg_delivery']
                 first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
