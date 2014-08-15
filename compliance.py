@@ -12,6 +12,7 @@ from invenio.search_engine import (perform_request_search,
 from invenio.bibdocfile import BibRecDocs
 from invenio.dbquery import run_sql
 import traceback
+from invenio.errorlib import register_exception
 
 
 JOURNALS_PDFA = {'ELS/NPB': 'Nuclear Physics B',
@@ -291,8 +292,8 @@ def get_record_checks(req, recids):
                         check_24h_delivery(first_del, doi_reg),
                         format_24h_delivery(check_24h_delivery(pdfa_del, doi_reg)),
                         check_24h_delivery(pdfa_del, doi_reg)))
-        except:
-            traceback.print_exc()
+        except Exception:
+            register_exception()
             recid = rid
             return_val.append("""<tr><th colspan="13" align="left">
                                <h2>%s</h2></th></tr>""" % (recid,))
@@ -498,7 +499,7 @@ def get_delivery_of_firts_pdfa(data):
 
 
 def check_24h_delivery(time, doi_reg):
-    if time:
+    if time and doi_reg:
         return time-doi_reg
     else:
         return None
