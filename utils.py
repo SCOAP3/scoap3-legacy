@@ -22,6 +22,10 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Brazil": "Brazil",
                        "Bulgaria": "Bulgaria",
                        "Canada": "Canada",
+                       ##########CERN########
+                       "CERN": "CERN",
+                       "Cern": "CERN",
+                       #######################
                        "Chile": "Chile",
                        ##########CHINA########
                        "China (PRC)": "China",

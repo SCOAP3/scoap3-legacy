@@ -11,8 +11,7 @@ from invenio.bibrecord import record_get_field_value
 from invenio.dbquery import run_sql
 from invenio.utils import NATIONS_DEFAULT_MAP, multi_replace
 
-_AFFILIATIONS = (['CERN']
-                 + sorted(list(set(NATIONS_DEFAULT_MAP.values())))
+_AFFILIATIONS = (sorted(list(set(NATIONS_DEFAULT_MAP.values())))
                  + ['HUMAN CHECK'])
 
 CFG_JOURNALS = ['Acta',
@@ -134,14 +133,7 @@ CFG_SELECTED_AFF = {'Andrews University':
                     'Yale University': ('Yale University',)}
 
 
-def filter_results_for_cern(results):
-    cern_results = perform_request_search(p='affiliation:CERN')
-    return list(set(results) - set(cern_results))
-
-
 def _build_query(nation):
-    if nation == 'CERN':
-        return 'affiliation:CERN'
     return "100__w:'{0}' OR 700__w:'{0}'".format(nation)
 
 
@@ -163,8 +155,6 @@ def index(req):
     for i, nation in enumerate(_AFFILIATIONS):
         query = _build_query(nation)
         results = perform_request_search(p=query, of='intbitset')
-        if nation == 'Switzerland':
-            results = filter_results_for_cern(results)
         req.write(tr.format(escape(nation),
                             escape(urlencode([("p", query)]), True),
                             len(results),
@@ -242,8 +232,6 @@ def articles(req, i, mode='html'):
         results = perform_request_search(p=query, cc=journal, of='intbitset')
         if not results:
             continue
-        if nation == 'Switzerland':
-            results = filter_results_for_cern(results)
         ret.append("<h2>%s (%s)</h2" % (escape(get_coll_i18nname(journal)),
                                         len(results)))
         ret.append("<p><ul>")
@@ -257,8 +245,8 @@ def articles(req, i, mode='html'):
             if mode == 'text':
                 print >> req, "http://dx.doi.org/%s" % doi
 
-            li = ("<li><a href='http://dx.doi.org/%s' "
-                  "target='_blank'>{0}</a>: {1}</li>")
+            li = ("<li><a href='http://dx.doi.org/{0}' "
+                  "target='_blank'>{1}</a>: {2}</li>")
             ret.append(li.format(escape(doi, True), escape(doi), title))
         ret.append("</ul></p>")
     body = '\n'.join(ret)
