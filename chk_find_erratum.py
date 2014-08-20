@@ -17,7 +17,7 @@
 
 """
 Finds paper which are erratum, addendum or edditorial and assigns them an extra
-collection: ERRATUM, ADDENDUM or EDITORIAL.
+collection: ERRATUM, ADDENDUM ,EDITORIAL or CORRIGENDUM.
 """
 from invenio.bibrecord import record_get_field_value
 
@@ -25,7 +25,8 @@ from invenio.bibrecord import record_get_field_value
 def check_records(records):
     collections = {'errat': 'ERRATUM',
                    'addend': 'ADDENDUM',
-                   'editor': 'EDITORIAL'}
+                   'editor': 'EDITORIAL',
+                   'corrigen': 'CORRIGENDUM'}
 
     for record in records:
         title = record_get_field_value(record, '245', code='a').lower()
@@ -33,7 +34,7 @@ def check_records(records):
             if phrase in title:
                 field = record_get_field_value(record, '980', code='c')
                 if field:
-                    if field in ['ERRATUM', 'ADDENDUM', 'EDITORIAL']:
+                    if field in ['ERRATUM', 'ADDENDUM', 'EDITORIAL','CORRIGENDUM']:
                         for position, value in record.iterfield('980__c'):
                             record.amend_field(position, collections[phrase])
                             break
