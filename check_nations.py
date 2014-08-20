@@ -9,15 +9,19 @@ def find_nations(field, subfields):
             values = [x.replace('.', '') for x in x[1].split(', ')]
             possible_affs = filter(lambda x: x is not None,
                                    map(NATIONS_DEFAULT_MAP.get, values))
-            if len(possible_affs) == 1:
-                result.append(possible_affs[0])
-            else:
-                result.append('HUMAN CHECK')
+            if 'CERN' in possible_affs and 'Switzerland' in possible_affs:
+                # Don't use remove in case of multiple Switzerlands
+                possible_affs = [x for x in possible_affs
+                                 if x != 'Switzerland']
 
-    if len(result) == 1:
-        return result[0]
+            result.extend(possible_affs)
+
+    result = sorted(list(set(result)))
+
+    if result:
+        return result
     else:
-        return 'HUMAN CHECK'
+        return ['HUMAN CHECK']
 
 
 def has_field(field, subfield):
@@ -36,5 +40,7 @@ def check_records(records, empty=False):
                 for i, x in enumerate(record[field]):
                     data = x[0]
                     if not has_field(data, 'w'):
-                        val = find_nations(data, ['u', 'v'])
-                        record.add_subfield((field + '__w', i, 0), 'w', val)
+                        values = find_nations(data, ['u', 'v'])
+                        for val in values:
+                            record.add_subfield((field + '__w', i, 0),
+                                                'w', val)
