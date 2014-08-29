@@ -33,8 +33,11 @@ from invenio.config import (CFG_SITE_LANG,
                             CFG_WEBSTYLE_TEMPLATE_SKIN,
                             CFG_VERSION)
 from invenio.messages import gettext_set_language, is_language_rtl
-from invenio.dateutils import convert_datecvs_to_datestruct, convert_datestruct_to_dategui
+from invenio.dateutils import (convert_datecvs_to_datestruct,
+                               convert_datestruct_to_dategui)
+from invenio.htmlutils import HTMLWasher
 from invenio.webstyle_templates import Template as DefaultTemplate
+
 
 class Template(DefaultTemplate):
 
@@ -242,47 +245,47 @@ template function generated it.
           'metabase': metabase,
           'rtl_direction': is_language_rtl(ln) and ' dir="rtl"' or '',
           'siteurl': CFG_SITE_URL,
-          'sitesecureurl' : CFG_SITE_SECURE_URL,
-          'canonical_and_alternate_urls' : self.tmpl_canonical_and_alternate_urls(uri),
-          'cssurl' : CFG_BASE_URL,
-          'cssskin' : CFG_WEBSTYLE_TEMPLATE_SKIN != 'default' and '_' + CFG_WEBSTYLE_TEMPLATE_SKIN or '',
+          'sitesecureurl': CFG_SITE_SECURE_URL,
+          'canonical_and_alternate_urls': self.tmpl_canonical_and_alternate_urls(uri),
+          'cssurl': CFG_BASE_URL,
+          'cssskin': CFG_WEBSTYLE_TEMPLATE_SKIN != 'default' and '_' + CFG_WEBSTYLE_TEMPLATE_SKIN or '',
           'rssurl': rssurl,
-          'ln' : ln,
-          'ln_iso_639_a' : ln.split('_', 1)[0],
+          'ln': ln,
+          'ln_iso_639_a': ln.split('_', 1)[0],
           'langlink': '?ln=' + ln,
 
-          'sitename' : CFG_SITE_NAME_INTL.get(ln, CFG_SITE_NAME),
-          'pageheadertitle': cgi.escape(pageheadertitle),
+          'sitename': CFG_SITE_NAME_INTL.get(ln, CFG_SITE_NAME),
+          'pageheadertitle': HTMLWasher().wash(pageheadertitle),
 
-          'sitesupportemail' : CFG_SITE_SUPPORT_EMAIL,
+          'sitesupportemail': CFG_SITE_SUPPORT_EMAIL,
 
-          'description' : cgi.escape(description, True),
-          'keywords' : cgi.escape(keywords, True),
-          'metaheaderadd' : metaheaderadd,
+          'description': cgi.escape(description, True),
+          'keywords': cgi.escape(keywords, True),
+          'metaheaderadd': metaheaderadd,
 
-          'userinfobox' : userinfobox,
-          'navtrailbox' : navtrailbox,
+          'userinfobox': userinfobox,
+          'navtrailbox': navtrailbox,
           'useractivities': useractivities_menu,
           'adminactivities': adminactivities_menu and ('<td class="headermoduleboxbodyblank">&nbsp;</td><td class="headermoduleboxbody%(personalize_selected)s">%(adminactivities)s</td>' % \
           {'personalize_selected': navmenuid.startswith('admin') and "selected" or "",
           'adminactivities': adminactivities_menu}) or '<td class="headermoduleboxbodyblank">&nbsp;</td>',
 
-          'pageheaderadd' : pageheaderadd,
-          'body_css_classes' : body_css_classes and ' class="%s"' % ' '.join(body_css_classes) or '',
+          'pageheaderadd': pageheaderadd,
+          'body_css_classes': body_css_classes and ' class="%s"' % ' '.join(body_css_classes) or '',
 
           'search_selected': navmenuid == 'search' and "selected" or "",
           'submit_selected': navmenuid == 'submit' and "selected" or "",
           'personalize_selected': navmenuid.startswith('your') and "selected" or "",
           'help_selected': navmenuid == 'help' and "selected" or "",
 
-          'msg_search' : _("Search"),
-          'msg_submit' : _("Submit"),
-          'msg_personalize' : _("Personalize"),
-          'msg_help' : _("Help"),
-          'unAPIurl' : cgi.escape('%s/unapi' % CFG_SITE_URL),
+          'msg_search': _("Search"),
+          'msg_submit': _("Submit"),
+          'msg_personalize': _("Personalize"),
+          'msg_help': _("Help"),
+          'unAPIurl': cgi.escape('%s/unapi' % CFG_SITE_URL),
           'linkbackTrackbackLink': headerLinkbackTrackbackLink,
           'hepDataAdditions': hepDataAdditions,
-          'inspect_templates_message' : inspect_templates_message
+          'inspect_templates_message': inspect_templates_message
         }
         return out
 
@@ -392,7 +395,8 @@ template function generated it.
     def detailed_record_container_bottom(self, recid, tabs, ln=CFG_SITE_LANG,
                                          show_similar_rec_p=True,
                                          creationdate=None,
-                                         modificationdate=None, show_short_rec_p=True):
+                                         modificationdate=None,
+                                         show_short_rec_p=True):
         """Prints the box displayed in detailed records pages, with tabs at the top.
 
         Returns content as it is if the number of tabs for this record
