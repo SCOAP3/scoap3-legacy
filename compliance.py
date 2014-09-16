@@ -35,8 +35,8 @@ def get_compliance_values():
         tmpdic = {}
         rec = get_record(recid)
         if '591' in rec:
-            for i in range(3):
-                str_val = rec['591'][i][0][0][1]
+            for field in rec['591']:
+                str_val = field[0][0][1]
                 key = str_val[:str_val.find(':')].lower()
                 val = int(str_val[str_val.find(':')+1:])
                 tmpdic[key] = val
@@ -267,6 +267,7 @@ def get_record_checks(req, recids):
                 <td>%s</td>
                 <td>%s</td>
                 <td>%s</td>
+                <td>%s</td>
                 <td %s>%s</td>
                 <td %s>%s</td>
             </tr>""" % (join(CFG_SITE_URL, 'record', str(recid)), recid,
@@ -281,6 +282,7 @@ def get_record_checks(req, recids):
                         is_compliant(recid, "authors"),
                         is_compliant(recid, "cc"),
                         is_compliant(recid, "scoap3"),
+                        is_compliant(recid. "category"),
                         str([rec_key for rec_key, rec_val
                              in record_compl.iteritems() if not rec_val]),
                         str(first_del),
@@ -310,6 +312,7 @@ def get_record_checks(req, recids):
                 <th>Copyright: authors</th>
                 <th>CC-BY</th>
                 <th>Funded by SCOAP3</th>
+                <th>Category</th>
                 <th>notes</th>
                 <th>First delivery</th>
                 <th>First AB delivery</th>
@@ -565,6 +568,7 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
                                    is_compliant(recid, 'authors').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'cc').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'scoap3').lstrip('<b>').rstrip('</b>'),
+                                   is_compliant(recid, 'category').lstrip('<b>').rstrip('</b>'),
                                    str([rec_key for rec_key, rec_val in record_compl.iteritems() if not rec_val]),
                                    str(first_del),
                                    str(first_ab_del),
