@@ -1,7 +1,3 @@
-from os import listdir
-from os.path import isfile
-from invenio.bibtask import write_message
-
 from string import maketrans
 
 from invenio.rawtext_search import RawTextSearch
@@ -11,8 +7,12 @@ from invenio.utils import (get_publisher, get_rawtext_from_record_id,
 
 
 class NonComplianceChecks:
-    def __init__(self, files_path, compliance_names):
+    def __init__(self, files_path, compliance_names,
+                 normal_search_delimiter="'", regex_search_delimiter="/"):
         self._non_compliance_checks = {}
+
+        self.normal_search_delimiter = normal_search_delimiter
+        self.regex_search_delimiter = regex_search_delimiter
 
         self._file_path = files_path
         self._translation_table = maketrans('\n\t', '  ')
@@ -30,9 +30,11 @@ class NonComplianceChecks:
             publisher = self._get_publisher_from_file_name(filename)
             with open(filename, 'r') as f:
                 lines = filter(lambda x: x != '',
-                               [line.strip() for line in f.readlines()])
+                               [line.strip('\n') for line in f.readlines()])
 
-            tmp[publisher] = RawTextSearch(lines[0].format(*lines[1:]))
+            tmp[publisher] = RawTextSearch(lines[0].format(*lines[1:]),
+                                           self.normal_search_delimiter,
+                                           self.regex_search_delimiter)
 
         return tmp
 
