@@ -24,11 +24,8 @@ def find_nations(field, subfields):
         return ['HUMAN CHECK']
 
 
-def has_field(field, subfield):
-    for x in field:
-        if x[0] == subfield:
-            return True
-    return False
+def delete_field(field, subfield):
+    field[:] = [x for x in field if x[0] != subfield]
 
 
 def check_records(records, empty=False):
@@ -39,8 +36,7 @@ def check_records(records, empty=False):
             if field in record:
                 for i, x in enumerate(record[field]):
                     data = x[0]
-                    if not has_field(data, 'w'):
-                        values = find_nations(data, ['u', 'v'])
-                        for val in values:
-                            record.add_subfield((field + '__w', i, 0),
-                                                'w', val)
+                    delete_field(data, 'w')
+                    for val in find_nations(data, ['u', 'v']):
+                        record.add_subfield((field + '__w', i, 0),
+                                            'w', val)
