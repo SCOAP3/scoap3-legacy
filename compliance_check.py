@@ -44,7 +44,8 @@ def check_records(records, empty=False):
     path = join(CFG_PYLIBDIR,
                 'invenio/bibcheck_plugins/compliance_check_configs/')
     checks = NonComplianceChecks(compliance_names=['CC', 'Authors', 'SCOAP3'],
-                                 files_path=path)
+                                 files_path=path,
+                                 regex_search_delimiter='//')
 
     for record in records:
         dic = checks.check(record)

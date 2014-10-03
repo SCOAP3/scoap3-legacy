@@ -85,6 +85,10 @@ class RawTextSearch:
         i = 0
         while i < len(self.searchstring):
             operator_length = self._operator_length(i)
+            if operator_length == 0:
+                raise Exception(('Infinite loop while splitting the search '
+                                 'string. Check your search_delimiters '
+                                 'or the search string.'))
             splits.append(self.searchstring[i:i+operator_length])
             i += operator_length
 
