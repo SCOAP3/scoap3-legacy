@@ -11,7 +11,6 @@ from invenio.search_engine import (perform_request_search,
                                    get_collection_reclist)
 from invenio.bibdocfile import BibRecDocs
 from invenio.dbquery import run_sql
-import traceback
 from invenio.errorlib import register_exception
 
 
@@ -282,7 +281,7 @@ def get_record_checks(req, recids):
                         is_compliant(recid, "authors"),
                         is_compliant(recid, "cc"),
                         is_compliant(recid, "scoap3"),
-                        is_compliant(recid. "category"),
+                        is_compliant(recid, "category"),
                         str([rec_key for rec_key, rec_val
                              in record_compl.iteritems() if not rec_val]),
                         str(first_del),
@@ -517,7 +516,6 @@ def format_24h_delivery(data):
 
 def write_csv(req, dictionary, journal_list, f_date, t_date,
               created_or_modified_date):
-
     return_val = ''
 
     for key in journal_list:
