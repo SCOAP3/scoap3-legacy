@@ -2,9 +2,9 @@ PREFIX = `python -c "from invenio.config import CFG_PREFIX; print CFG_PREFIX"`
 LIBDIR = $(PREFIX)/lib
 ETCDIR = $(PREFIX)/etc
 WWWDIR = $(PREFIX)/var/www
-#APACHE = `python -c "from invenio.bibtask import guess_apache_process_user; print guess_apache_process_user()"`
+APACHE = `python -c "from invenio.bibtask import guess_apache_process_user; print guess_apache_process_user()"`
 #APACHE = www-data
-APACHE = wojciech
+#APACHE = wojciech
 INSTALL = install -g $(APACHE)
 COPYDIR = cp -r
 
