@@ -6,9 +6,12 @@ def find_nations(field, subfields):
     result = []
     for x in field:
         if x[0] in subfields:
-            values = [x.replace('.', '') for x in x[1].split(', ')]
-            possible_affs = filter(lambda x: x is not None,
-                                   map(NATIONS_DEFAULT_MAP.get, values))
+            for delimiter in [', ', ' ']:
+                values = [y.replace('.', '') for y in x[1].split(delimiter)]
+                possible_affs = filter(lambda y: y is not None,
+                                       map(NATIONS_DEFAULT_MAP.get, values))
+                if possible_affs:
+                    break
             if 'CERN' in possible_affs and 'Switzerland' in possible_affs:
                 # Don't use remove in case of multiple Switzerlands
                 possible_affs = [x for x in possible_affs
