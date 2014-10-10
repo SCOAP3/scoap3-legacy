@@ -1,7 +1,7 @@
 from invenio.config import CFG_SITE_URL
 from os.path import join
 from time import strftime
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from invenio.webpage import (pagefooteronly, pageheaderonly)
 from invenio.search_engine import (perform_request_search,
@@ -221,6 +221,50 @@ def get_recid_list(req, collections='', from_date='', to_date='',
     return result
 
 
+def get_detiled_package_delivery(doi):
+    delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
+    if delivery_data:
+        first_del = delivery_data[0]['pkg_delivery']
+        first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
+        last_mod = delivery_data[-1]['pkg_delivery']
+        doi_reg = delivery_data[0]['doi_reg']
+        pdfa_del = get_delivery_of_firts_pdfa(delivery_data)
+        return (first_del, first_ab_del, last_mod, doi_reg, pdfa_del)
+    else:
+        return None
+
+
+def get_general_delivery(recid, doi):
+    delivery_data = run_sql("select * from doi where doi='%s'" % (doi,))
+    if delivery_data:
+        first_del = get_creation_date(recid)
+        first_ab_del = None
+        last_mod = get_modification_date(recid)
+        doi_reg = delivery_data[0][1]
+        pdfa_del = None
+        return (first_del, first_ab_del, last_mod, doi_reg, pdfa_del)
+    else:
+        return None
+
+
+def get_delivery_data(recid, doi):
+    first_del = None
+    first_ab_del = None
+    last_mod = None
+    doi_reg = None
+    pdfa_del = None
+
+    delivery_data = get_detiled_package_delivery(doi)
+    if delivery_data:
+        return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4]
+    else:
+        delivery_data = get_general_delivery(recid, doi)
+        if delivery_data:
+            return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4]
+
+    return first_del, first_ab_del, last_mod, doi_reg, pdfa_del
+
+
 def get_record_checks(req, recids):
     if recids == '':
         return ''
@@ -232,20 +276,9 @@ def get_record_checks(req, recids):
             recid = int(rid)
             rec = get_record(recid)
             doi = get_doi(rec)
-            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC",
-                                    (doi,),
-                                    with_dict=True)
-            first_del = None
-            first_ab_del = None
-            last_mod = None
-            doi_reg = None
-            pdfa_del = None
-            if delivery_data:
-                first_del = delivery_data[0]['pkg_delivery']
-                first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
-                last_mod = delivery_data[-1]['pkg_delivery']
-                doi_reg = delivery_data[0]['doi_reg']
-                pdfa_del = get_delivery_of_firts_pdfa(delivery_data)
+
+            first_del, first_ab_del, last_mod, doi_reg, pdfa_del = get_delivery_data(recid, doi)
+
             record_compl = is_complete_record(recid)
             return_val.append("""<tr>
                 <td><a href="%s">%i</a></td>
@@ -311,7 +344,7 @@ def get_record_checks(req, recids):
                 <th>Copyright: authors</th>
                 <th>CC-BY</th>
                 <th>Funded by SCOAP3</th>
-                <th>Category</th>
+                <th>arXiv category</th>
                 <th>notes</th>
                 <th>First delivery</th>
                 <th>First AB delivery</th>
@@ -501,6 +534,8 @@ def get_delivery_of_firts_pdfa(data):
 
 
 def check_24h_delivery(time, doi_reg):
+    if type(time) is str:
+        time = datetime.strptime(time,'%Y-%m-%d')
     if time and doi_reg:
         return time-doi_reg
     else:
@@ -528,14 +563,15 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
         if papers == []:
             continue
 
-        return_val += key
+        return_val += key + '\n'
         return_val += ';'.join(['recid', 'cr. date', 'mod. date', 'DOI',
                                 'XML', 'PDF', 'PDF/A', 'Complete record?',
                                 'arXiv number', 'Copyright: authors', 'CC-BY',
-                                'Funded by SCOAP3', 'notes', 'First delivery',
-                                'First AB delivery', 'Last modification',
-                                'PDF/A upload', 'DOI registration',
-                                'Delivery diff', 'PDF/A diff']) + '\n'
+                                'Funded by SCOAP3', 'arXiv category', 'notes',
+                                'First delivery', 'First AB delivery',
+                                'Last modification', 'PDF/A upload',
+                                'DOI registration', 'Delivery diff',
+                                'PDF/A diff']) + '\n'
 
         for recid in papers:
             rec = get_record(recid)
@@ -545,13 +581,7 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
             last_mod = None
             doi_reg = None
             pdfa_del = None
-            delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
-            if delivery_data:
-                first_del = delivery_data[0]['pkg_delivery']
-                first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
-                last_mod = delivery_data[-1]['pkg_delivery']
-                doi_reg = delivery_data[0]['doi_reg']
-                pdfa_del = get_delivery_of_firts_pdfa(delivery_data)
+            first_del, first_ab_del, last_mod, doi_reg, pdfa_del = get_delivery_data(recid, doi)
 
             record_compl = is_complete_record(recid)
             return_val += ';'.join(str(item) for item in [str(recid),
@@ -573,7 +603,7 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
                                    str(last_mod),
                                    str(pdfa_del),
                                    str(doi_reg),
-                                   check_24h_delivery(first_ab_del, doi_reg),
+                                   check_24h_delivery(first_del, doi_reg),
                                    check_24h_delivery(pdfa_del, doi_reg)
                                    ])
             return_val += '\n'
