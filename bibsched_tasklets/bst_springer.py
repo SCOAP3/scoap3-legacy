@@ -22,8 +22,8 @@ Springer BibTaskLet
 """
 
 from harvestingkit.springer_package import SpringerPackage
+from bst_utils import run
 
 def bst_springer():
-    els = SpringerPackage()
-    els.bibupload_it()
-
+    sp = SpringerPackage()
+    run(sp, sp.packages_delivery, sp.doi_package_name_mapping)

@@ -22,9 +22,11 @@ Springer BibTaskLet
 """
 
 from harvestingkit.oup_package import OxfordPackage
+from bst_utils import run
+
 
 def bst_oxford():
-    els = OxfordPackage()
-    els.bibupload_it()
-    els.empty_ftp()
+    op = OxfordPackage()
+    run(op, op.packages_delivery, op.doi_package_name_mapping)
+    op.empty_ftp()
 
