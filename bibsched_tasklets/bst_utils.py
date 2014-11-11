@@ -1,6 +1,7 @@
 from invenio.dbquery import run_sql
 from invenio.bibtask import write_message
 
+
 def prepare_package_table():
     return run_sql("""CREATE TABLE IF NOT EXISTS package (
         id mediumint NOT NULL AUTO_INCREMENT,
@@ -60,5 +61,4 @@ def run(package_obj, packages_deliveries, doi_package_name_mappings):
 
     write_message(packages_deliveries)
     store_packages_deliveries(packages_deliveries)
-    store_doi_package_mappings(doi_package_name_mapping)
-    
+    store_doi_package_mappings(doi_package_name_mappings)
