@@ -27,7 +27,7 @@ from invenio.bibtask import write_message
 
 
 def bst_fix_elsevier_missing_file_formats():
-    ids = perform_request_search(p="980:Elsevier", of='intbitset')
+    ids = perform_request_search(c=["Nuclear Physics B", "Physics Letters B"], of='intbitset')
     for one_id in ids:
         bibrec = BibRecDocs(one_id)
         bibtextdoc = bibrec.list_bibdocs()[0]
