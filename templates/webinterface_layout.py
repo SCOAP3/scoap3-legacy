@@ -352,7 +352,7 @@ class WebInterfaceInvenio(WebInterfaceSearchInterfacePages):
                    #('getfile.py', 'getfile'),
                    #'submit',
                    #'rss',
-                   #'stats',
+                   'stats',
                    #'journal',
                    #'help',
                    'unapi',
