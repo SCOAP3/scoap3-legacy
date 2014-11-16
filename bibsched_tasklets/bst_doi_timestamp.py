@@ -27,6 +27,7 @@ from datetime import datetime, timedelta
 from invenio.bibtask import task_update_progress, write_message
 from invenio.crossrefutils import get_all_modified_dois
 from invenio.dbquery import run_sql
+from urllib2 import URLError
 
 
 CFG_SCOAP3_DOIS = {
@@ -59,9 +60,12 @@ def bst_doi_timestamp(reset=0):
     for publisher, re_match in CFG_SCOAP3_DOIS.items():
         task_update_progress("Retrieving DOIs for %s" % publisher)
         write_message("Retriving DOIs for %s" % publisher)
-        res = get_all_modified_dois(publisher, last_run, re_match, debug=True)
-        for doi in res:
-            if run_sql("SELECT doi FROM doi WHERE doi=%s", (doi, )):
-                continue
-            write_message("New DOI discovered for publisher %s: %s" % (publisher, doi))
-            run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
+        try:
+            res = get_all_modified_dois(publisher, last_run, re_match, debug=True)
+            for doi in res:
+                if run_sql("SELECT doi FROM doi WHERE doi=%s", (doi, )):
+                    continue
+                write_message("New DOI discovered for publisher %s: %s" % (publisher, doi))
+                run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
+        except URLError as e:
+            write_message("Problem with connection! %s" % (e,))
