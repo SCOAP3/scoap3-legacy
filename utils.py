@@ -19,7 +19,10 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Belgique": "Belgium",
                        #######################
                        "Bangladesh": "Bangladesh",
+                       ##########BRAZIL#######
                        "Brazil": "Brazil",
+                       "Brasil": "Brazil",
+                       ######################
                        "Bulgaria": "Bulgaria",
                        "Canada": "Canada",
                        ##########CERN########
@@ -31,6 +34,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "China (PRC)": "China",
                        "PR China": "China",
                        "China": "China",
+                       "People's Republic of China": "China",
                        #######################
                        "Colombia": "Colombia",
                        "Costa Rica": "Costa Rica",
@@ -75,6 +79,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        #######################
                        "Lebanon": "Lebanon",
                        "Lithuania": "Lithuania",
+                       "Luxembourg": "Luxembourg",
                        ##########MEXICO########
                        "Mexico": "Mexico",
                        "México": "Mexico",
@@ -94,6 +99,9 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Poland": "Poland",
                        "Portugal": "Portugal",
                        "Romania": "Romania",
+                       ##########SAN MARINO####
+                       "Republic of San Marino": "Republic of San Marino",
+                       "San Marino": "Republic of San Marino",
                        ##########RUSSIA########
                        "Russia": "Russia",
                        "Russian Federation": "Russia",
@@ -113,16 +121,21 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Spain": "Spain",
                        "Sweden": "Sweden",
                        "Switzerland": "Switzerland",
+                       ##########TAIWAN#########
                        "Taiwan": "Taiwan",
+                       "ROC": "Taiwan",
+                       "R.O.C": "Taiwan",
+                       "Republic of China": "Taiwan",
+                       #########################
                        "Thailand": "Thailand",
                        "Tunisia": "Tunisia",
                        "Turkey": "Turkey",
                        "Ukraine": "Ukraine",
                        ##########ENGLAND########
                        "United Kingdom": "UK",
+                       "Kingdom": "UK",
                        "UK": "UK",
-                       #######################
-                       "England": "England",
+                       "England": "UK",
                        ##########USA########
                        "United States of America": "USA",
                        "United States": "USA",
@@ -148,7 +161,8 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Mongolia": "Mongolia",
                        #########U.Arab#Emirates#####
                        "United Arab Emirates": "United Arab Emirates",
-                       "Emirates"
+                       "Emirates": "United Arab Emirates",
+                       #######################
                        "Malaysia": "Malaysia",
                        "Qatar": "Qatar",
                        "Kyrgyz Republic": "Kyrgyz Republic",
