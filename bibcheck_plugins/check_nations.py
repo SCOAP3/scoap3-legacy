@@ -6,7 +6,7 @@ def find_nations(field, subfields):
     result = []
     for x in field:
         if x[0] in subfields:
-            for delimiter in [', ', ' ']:
+            for delimiter in [',', ' ']:
                 values = [y.replace('.', '').lower().strip() for y in x[1].split(delimiter)]
                 possible_affs = filter(lambda y: y is not None,
                                        map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
