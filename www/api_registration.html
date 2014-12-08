@@ -1,0 +1,131 @@
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SCOAP3 | API</title>
+    <link rel="icon" type="image/x-icon" href="http://scoap3.org/wp-content/themes/scoap3_theme/favicon.ico">
+    <!--[if lt IE 9]>
+    <script src="http://scoap3.org/wp-content/themes/scoap3_theme/js/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <link rel="stylesheet" id="expound-style-css" href="http://scoap3.org/wp-content/themes/scoap3_theme/style.css?ver=3" type="text/css" media="all">
+    <link rel="stylesheet" id="http://scoap3.org/wp-content/miwi/media/system/css/base.css-css" href="http://scoap3.org/wp-content/miwi/media/system/css/base.css?ver=4.0.1" type="text/css" media="all">
+    <link rel="canonical" href="http://scoap3.org/">
+    <link rel="shortlink" href="http://scoap3.org/">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script>
+        $.getJSON( "http://repo.scoap3.org/api.py/_get_countries", function( data ) {
+            var items = [];
+            $.each( data, function( key, val ) {
+                items.push( "<option value='" + key + "'>" + val + "</option>" );
+            });
+            $("select[name=institution]").append(items);
+        });
+
+        function scoap3_partner(){
+            $("#text_tmp").hide();
+            $("#form1, #form2").hide();
+            if($("input[name=scoap3]:checked").attr("value") == "1"){
+                $("#form1").show("fast");
+            }else{
+                $("#form2").show("fast");
+            }
+        }
+        function load_institutions(){
+
+        }
+    </script>
+    <style type="text/css">
+        label {
+            display:inline-block;
+            width:70px;
+            margin:0 5px 10px 0;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body class="home page page-id-4 page-template-default"><div style="display: none;" id="MathJax_Message"></div>
+<div id="page" class="hfeed site">
+        <header id="masthead" class="site-header" role="banner">
+        <div class="site-branding" style="background-image: url(http://scoap3.org/wp-content/themes/scoap3_theme/images/gradient.png);">
+            <div class="logo-background" style="background-image: url(http://scoap3.org/wp-content/themes/scoap3_theme/images/logo.png);">
+            <!-- <img src="http://scoap3.org/wp-content/themes/scoap3_theme/logo.png"></img> -->
+            <div class="site-title-group">
+                <h1 class="site-title">
+                    <a href="http://scoap3.org/" title="SCOAP3" rel="home"></a><h1 class="site-title"><a href="http://scoap3.org/" title="SCOAP3" rel="home"></a><a href="http://scoap3.org/" title="SCOAP3" rel="home">SCOAP<sup><font size="-2">3</font></sup> – API</a>
+                    </h1></h1>
+                <h2 class="site-description">Automated data harvest and search utility</h2>
+            </div>
+            </div>
+        </div>
+
+        <nav id="site-navigation" class="navigation-main" role="navigation">
+            <h1 class="menu-toggle">Menu</h1>
+            <div class="screen-reader-text skip-link"><a href="#content" title="Skip to content">Skip to content</a></div>
+
+            <div class="menu-main-menu-container">
+                <ul id="menu-main-menu" class="menu">
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-4"><a href="http://scoap3.org/">Home</a></li>
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="http://repo.scoap3.org">The repository</sup></a>
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-4"><a href="http://scoap3.org">SCOAP<sup>3</sup> website</a></li>
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page current-menu-item"><a href="http://api.scoap3.org/registration">Registration</a></li>
+                </ul>
+            </div>
+        </nav><!-- #site-navigation -->
+    </header><!-- #masthead -->
+
+    <div id="main" class="site-main">
+
+    <div id="primary" class="content-area">
+        <div id="content" class="site-content" role="main">
+            <article id="post-4" class="post-4 page type-page status-publish hentry">
+                <header class="entry-header">
+                    <h1 class="entry-title">Registration</h1>
+                </header><!-- .entry-header -->
+
+                <div class="entry-content">
+                    <p>The SCOAP3 API offers a pilot service to the <a href="http://scoap3.org/participating-countries">SCOAP3 partners</a>. All API calls require a token, which will be provided upon registration.</p>
+
+                    <form>
+                        <h2>Step 1</h2>
+                        <p>Are you affiliated with a SCOAP3 partner institution?</p>
+
+                            <input type="radio" name="scoap3" value="1" onclick="scoap3_partner()">Yes
+                            <input type="radio" name="scoap3" value="0" onclick="scoap3_partner()">No
+
+
+                        <h2>Step 2</h2>
+                            <p id="text_tmp">Please finish the step above.</p>
+                            <div id="form1" hidden>
+                                <p>Please provide your contact details. We will send you your token.</p>
+                                <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
+                                <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
+                                <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
+                                <label>Country:</label><select name="country" required>
+                                        <select><br/>
+                                <label>Institution:</label><select name="institution" disabled required>
+                                             </select><br/>
+                                <input type="submit" value="Register">
+                            </div>
+
+                            <div id="form2" class="" hidden>
+                                <p>Please explain why you would like access to the SCOAP3 API, and which application you have in mind. The SCOAP3 API is a pilot service for the SCOAP3 partners, but in certain cases we will contact you to discuss your ideas.</p>
+                                <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" reqiured><br/>
+                                <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" reqiured><br/>
+                                <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" reqiured><br/>
+                                <label>Country:</label><input type="text" name="county" maxlength="100" reqiured><br/>
+                                <label>Institution:</label><input type="text" name="institute" maxlength="200" reqiured><br/>
+                                <label>Description:</label><textarea name="description" maxlength="5000" reqiured></textarea><br/>
+                                <input type="submit" value="Register">
+                            </div>
+                    </form>
+                </div><!-- .entry-content -->
+            </article><!-- #post-## -->
+        </div><!-- #content -->
+    </div><!-- #primary -->
+    <footer id="colophon" class="site-footer" role="contentinfo">
+        Maintained by repo.admin@scoap3.org
+    </footer><!-- #colophon -->
+</div><!-- #page -->
+</body>
+</html>
