@@ -1,5 +1,6 @@
 from invenio.dbquery import run_sql
 from invenio.webpage import pagefooteronly, pageheaderonly
+from urlutils import redirect_to_url
 import json
 
 
@@ -858,6 +859,28 @@ def _prepare_country_db():
     ) ENGINE=MyISAM;""")
 
 
+def _prepare_registration_db():
+    return run_sql("""CREATE TABLE IF NOT EXISTS registration (
+        id mediumint NOT NULL AUTO_INCREMENT,
+        email varchar(255) NOT NULL UNIQUE,
+        name varchar(255) NOT NULL,
+        position varchar(255) NOT NULL,
+        country varchar(255),
+        country_id mediumint,
+        organisation varchar(255),
+        organisation_id mediumint,
+        is_affiliated boolean NOT NULL,
+        description varchar(5000) NOT NULL,
+        accepted boolean NOT NULL DEFAULT false,
+        PRIMARY KEY registration(id),
+        FOREIGN KEY (country_id)
+            REFERENCES country(id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (organisation_id)
+            REFERENCES institution(id)
+            ON DELETE CASCADE
+    ) ENGINE=MyISAM;""")
+
 def _prepare_institut_db():
     return run_sql("""CREATE TABLE IF NOT EXISTS institution (
         id mediumint NOT NULL AUTO_INCREMENT,
@@ -887,33 +910,27 @@ def get_organisation(req, country_id=""):
         json.dump(org, req)
 
 
+def _register(req, query_string, params, email):
+    if not run_sql("SELECT id FROM registration WHERE email=%s", (email,)):
+        try:
+            run_sql(query_string, params)
+            redirect_to_url(req, "http://api.scoap3.org/registered")
+        except:
+            redirect_to_url(req, "http://api.scoap3.org/registration_error")
+    else:
+        # emial already registered
+        redirect_to_url(req, "http://api.scoap3.org/alredy_registered")
+
+
 def register_associated(req, name, email, position, country, organisation):
-    req.content_type = "text/html"
-    req.write(pageheaderonly("Registration successful", req=req))
-    req.write("<h1>Thank you for registration</h1>")
-    req.write("<p>You should receive shortly an email that your registratio is in progres.</p>")
-    req.write("""<p>
-                Name: %s<br/>
-                email: %s<br/>
-                position: %s<br/>
-                country: %s<br/>
-                organisation: %s<br/>
-                </p>""" % (name, email, position, country, organisation))
-    req.write(pagefooteronly(req=req))
-    return ""
+    query_string = """INSERT INTO registration(name, email, position, country, organisation, is_affiliated) VALUES(%s, %s, %s, %s, %s, 1)"""
+    params = (name, email, position, country, organisation)
+
+    _register(req, query_string, params, email)
+
 
 def register_not_associated(req, name, email, position, country, organisation, description):
-    req.content_type = "text/html"
-    req.write(pageheaderonly("Registration successful", req=req))
-    req.write("<h1>Thank you for registration</h1>")
-    req.write("<p>You should receive shortly an email that your registratio is in progres.</p>")
-    req.write("""<p>
-                Name: %s<br/>
-                email: %s<br/>
-                position: %s<br/>
-                country: %s<br/>
-                organisation: %s<br/>
-                description: %s<br/>
-                </p>""" % (name, email, position, country, organisation, description))
-    req.write(pagefooteronly(req=req))
-    return ""
+    query_string = """INSERT INTO registration(name, email, position, country, organisation, is_affiliated, description) VALUES(%s, %s, %s, %s, %s, 0, %s)"""
+    params = (name, email, position, country, organisation, description)
+
+    _register(req, query_string, params, email)
