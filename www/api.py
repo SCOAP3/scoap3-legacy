@@ -1,8 +1,12 @@
 from invenio.dbquery import run_sql
-from invenio.webpage import pagefooteronly, pageheaderonly
+import json
 
 
-def _init_db():
+def index(req):
+  return ""
+
+
+def init_db():
     _prepare_country_db()
     _prepare_institut_db()
 
@@ -50,7 +54,7 @@ def _init_db():
     for country in def_country:
         run_sql("INSERT INTO country (name) VALUES('%s')" % (country,))
 
-    def_institutes = (("Austria", "Die Oesterreichische Bibliothekenverbund und Service "),
+    def_institutes = (("Austria", "Die Oesterreichische Bibliothekenverbund und Service"),
                       ("Austria", "Bundesforschungs und Ausbildungszentrum für Wald, Naturgefahren und Landschaft"),
                       ("Austria", "Donauuniversität Krems"),
                       ("Austria", "Fachhochschule Campus Wien"),
@@ -836,8 +840,13 @@ def _init_db():
                       ("United States", "Yeshiva University"))
 
     for institute in def_institutes:
-        country_id = run_sql("SELECT id FROM country WHERE name = %s" % (institute[0],))
-        run_sql("INSERT INTO institution (name, country_id) VALUES('%s', '%s')" % (institute[1], country_id))
+        country_id = run_sql("SELECT id FROM country WHERE name = %s", (institute[0],))
+        try:
+            run_sql("INSERT INTO institution (name, country_id) VALUES(%s, %s)", (institute[1], country_id[0][0]))
+        except Exception as e:
+            print e
+
+    return ""
 
 
 def _prepare_country_db():
@@ -861,16 +870,17 @@ def _prepare_institut_db():
     ) ENGINE=MyISAM;""")
 
 
-def _get_countries(req):
-    countries = run_sql("SELECT id, name from country")
+def get_countries(req):
+    countries = run_sql("SELECT name, id from country ORDER BY name")
+    countries = dict((key, value) for (key, value) in countries)
     req.content_type = "application/json"
-    req.write(countries)
-    #req.write(pagefooteronly(req=req))
+    json.dump(countries, req)
 
 
-def _get_institutes_for_country(req, country=""):
+def get_organisation(req, country_id=""):
     req.content_type = "application/json"
-    if country:
-        country_id = run_sql("SELECT id FROM country WHERE name = %s" % (country,))
-        institutions = run_sql("SELECT id, name FROM institution WHERE country_id = %s" % (country_id,))
-        req.write(institutions)
+    if country_id:
+        #country_id = run_sql("SELECT id FROM country WHERE name = %s", (country,))
+        org = run_sql("SELECT id, name FROM institution WHERE country_id = %s ORDER BY name", (country_id,))
+        org = dict((key, value) for (key, value) in org)
+        json.dump(org, req)

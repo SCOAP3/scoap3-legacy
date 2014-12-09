@@ -13,12 +13,13 @@
     <link rel="shortlink" href="http://scoap3.org/">
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
     <script>
-        $.getJSON( "http://repo.scoap3.org/api.py/_get_countries", function( data ) {
+        $.getJSON( "http://api.scoap3.org/api.py/get_countries", function( data ) {
             var items = [];
+            items.push( "<option value=''>Select one</option>" );
             $.each( data, function( key, val ) {
-                items.push( "<option value='" + key + "'>" + val + "</option>" );
+                items.push( "<option value='" + val + "'>" + key + "</option>" );
             });
-            $("select[name=institution]").append(items);
+            $("select[name=country]").append(items);
         });
 
         function scoap3_partner(){
@@ -30,14 +31,29 @@
                 $("#form2").show("fast");
             }
         }
-        function load_institutions(){
 
+        function load_organisations(){
+            var country_id = $("select[name=country] option:selected").val();
+            $.getJSON( "http://api.scoap3.org/api.py/get_organisation?country_id="+country_id, function( data ) {
+                var items = [];
+                items.push( "<option value=''>Select one</option>" );
+                $.each( data, function( key, val ) {
+                    items.push( "<option value='" + key + "'>" + val + "</option>" );
+                });
+                $("select[name=organisation]").empty();
+                if (items){
+                        $("select[name=organisation]").prop('disabled', false);
+                        $("select[name=organisation]").append(items);
+                }else{
+                        $("select[name=organisation]").prop('disabled', true);
+                }
+            });
         }
     </script>
     <style type="text/css">
         label {
             display:inline-block;
-            width:70px;
+            width:80px;
             margin:0 5px 10px 0;
             text-align: right;
         }
@@ -65,7 +81,7 @@
 
             <div class="menu-main-menu-container">
                 <ul id="menu-main-menu" class="menu">
-                    <li class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-4"><a href="http://scoap3.org/">Home</a></li>
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-4"><a href="http://api.scoap3.org/">Home</a></li>
                     <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="http://repo.scoap3.org">The repository</sup></a>
                     <li class="menu-item menu-item-type-post_type menu-item-object-page page_item page-item-4"><a href="http://scoap3.org">SCOAP<sup>3</sup> website</a></li>
                     <li class="menu-item menu-item-type-post_type menu-item-object-page current-menu-item"><a href="http://api.scoap3.org/registration">Registration</a></li>
@@ -86,39 +102,40 @@
                 <div class="entry-content">
                     <p>The SCOAP3 API offers a pilot service to the <a href="http://scoap3.org/participating-countries">SCOAP3 partners</a>. All API calls require a token, which will be provided upon registration.</p>
 
+                    <h2>Step 1</h2>
+                    <p>Are you affiliated with a SCOAP3 partner institution?</p>
                     <form>
-                        <h2>Step 1</h2>
-                        <p>Are you affiliated with a SCOAP3 partner institution?</p>
-
-                            <input type="radio" name="scoap3" value="1" onclick="scoap3_partner()">Yes
-                            <input type="radio" name="scoap3" value="0" onclick="scoap3_partner()">No
-
-
-                        <h2>Step 2</h2>
-                            <p id="text_tmp">Please finish the step above.</p>
-                            <div id="form1" hidden>
-                                <p>Please provide your contact details. We will send you your token.</p>
-                                <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
-                                <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
-                                <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
-                                <label>Country:</label><select name="country" required>
-                                        <select><br/>
-                                <label>Institution:</label><select name="institution" disabled required>
-                                             </select><br/>
-                                <input type="submit" value="Register">
-                            </div>
-
-                            <div id="form2" class="" hidden>
-                                <p>Please explain why you would like access to the SCOAP3 API, and which application you have in mind. The SCOAP3 API is a pilot service for the SCOAP3 partners, but in certain cases we will contact you to discuss your ideas.</p>
-                                <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" reqiured><br/>
-                                <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" reqiured><br/>
-                                <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" reqiured><br/>
-                                <label>Country:</label><input type="text" name="county" maxlength="100" reqiured><br/>
-                                <label>Institution:</label><input type="text" name="institute" maxlength="200" reqiured><br/>
-                                <label>Description:</label><textarea name="description" maxlength="5000" reqiured></textarea><br/>
-                                <input type="submit" value="Register">
-                            </div>
+                        <input type="radio" name="scoap3" value="1" onclick="scoap3_partner()">Yes
+                        <input type="radio" name="scoap3" value="0" onclick="scoap3_partner()">No
                     </form>
+
+                    <h2>Step 2</h2>
+                        <p id="text_tmp">Please finish the step above.</p>
+                        <form id="form1" hidden>
+                            <p>Please provide your contact details. We will send you your token.</p>
+                           <label>Name:</label>
+                           <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
+                            <label>E-mail:</label>
+                            <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
+                            <label>Position:</label>
+                            <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
+                            <label>Country:</label>
+                            <select onchange="load_organisations()" name="country" required><select><br/>
+                            <label>Organisation:</label>
+                            <select name="organisation" disabled required></select><br/>
+                            <input type="submit" value="Register">
+                        </form>
+
+                        <form id="form2" class="" hidden>
+                            <p>Please explain why you would like access to the SCOAP3 API, and which application you have in mind. The SCOAP3 API is a pilot service for the SCOAP3 partners, but in certain cases we will contact you to discuss your ideas.</p>
+                            <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" reqiured><br/>
+                            <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" reqiured><br/>
+                            <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" reqiured><br/>
+                            <label>Country:</label><input type="text" name="county" maxlength="100" reqiured><br/>
+                            <label>Institution:</label><input type="text" name="institute" maxlength="200" reqiured><br/>
+                            <label>Description:</label><textarea name="description" maxlength="5000" reqiured></textarea><br/>
+                            <input type="submit" value="Register">
+                        </form>
                 </div><!-- .entry-content -->
             </article><!-- #post-## -->
         </div><!-- #content -->
