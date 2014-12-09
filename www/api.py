@@ -1,4 +1,5 @@
 from invenio.dbquery import run_sql
+from invenio.webpage import pagefooteronly, pageheaderonly
 import json
 
 
@@ -884,3 +885,35 @@ def get_organisation(req, country_id=""):
         org = run_sql("SELECT id, name FROM institution WHERE country_id = %s ORDER BY name", (country_id,))
         org = dict((key, value) for (key, value) in org)
         json.dump(org, req)
+
+
+def register_associated(req, name, email, position, country, organisation):
+    req.content_type = "text/html"
+    req.write(pageheaderonly("Registration successful", req=req))
+    req.write("<h1>Thank you for registration</h1>")
+    req.write("<p>You should receive shortly an email that your registratio is in progres.</p>")
+    req.write("""<p>
+                Name: %s<br/>
+                email: %s<br/>
+                position: %s<br/>
+                country: %s<br/>
+                organisation: %s<br/>
+                </p>""" % (name, email, position, country, organisation))
+    req.write(pagefooteronly(req=req))
+    return ""
+
+def register_not_associated(req, name, email, position, country, organisation, description):
+    req.content_type = "text/html"
+    req.write(pageheaderonly("Registration successful", req=req))
+    req.write("<h1>Thank you for registration</h1>")
+    req.write("<p>You should receive shortly an email that your registratio is in progres.</p>")
+    req.write("""<p>
+                Name: %s<br/>
+                email: %s<br/>
+                position: %s<br/>
+                country: %s<br/>
+                organisation: %s<br/>
+                description: %s<br/>
+                </p>""" % (name, email, position, country, organisation, description))
+    req.write(pagefooteronly(req=req))
+    return ""
