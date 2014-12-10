@@ -1,6 +1,6 @@
 from invenio.dbquery import run_sql
 from invenio.webpage import pagefooteronly, pageheaderonly
-from urlutils import redirect_to_url
+from invenio.urlutils import redirect_to_url
 import json
 
 
@@ -919,7 +919,7 @@ def _register(req, query_string, params, email):
             redirect_to_url(req, "http://api.scoap3.org/registration_error")
     else:
         # emial already registered
-        redirect_to_url(req, "http://api.scoap3.org/alredy_registered")
+        redirect_to_url(req, "http://api.scoap3.org/already_registered")
 
 
 def register_associated(req, name, email, position, country, organisation):
