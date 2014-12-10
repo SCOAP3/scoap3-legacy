@@ -4,7 +4,6 @@ from invenio.urlutils import redirect_to_url
 from invenio.mailutils import send_email
 from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
 from invenio.webuser import collect_user_info
-from invenio.webinterface_handler import wash_urlargd
 import json
 
 
@@ -918,11 +917,12 @@ def _register(req, query_string, params, email):
     if not run_sql("SELECT id FROM registration WHERE email=%s", (email,)):
         try:
             run_sql(query_string, params)
+            header = ""
+            footer = """Best regards
+                     The SCOAP3 team"""
             subject = "Registration to SCOAP3 API"
-            content = """Thanks for your interest in the SCOAP3 API. We have received your request. We will be back to you within one working day.
-
-The SCOAP3 team."""
-            send_email("info@scoap3.org", email, subject=subject, content=content)
+            content = "Thanks for your interest in the SCOAP3 API. We have received your request for a token. We will be back to you within one working day."
+            send_email("info@scoap3.org", email, subject=subject, content=content, header=header, footer=footer)
             redirect_to_url(req, "http://api.scoap3.org/registered")
         except:
             redirect_to_url(req, "http://api.scoap3.org/registration_error")
@@ -931,20 +931,18 @@ The SCOAP3 team."""
         redirect_to_url(req, "http://api.scoap3.org/already_registered")
 
 
-def register_associated(req, form, name, email, position, country, organisation):
-    args = wash_urlargd(form, {'name': (str, None), 'email': (str, None), 'position': (str, "en"), 'country': (int, None), 'organisation': (int, None)})
+def register_associated(req, name, email, position, country, organisation):
     query_string = """INSERT INTO registration(name, email, position, country, organisation, is_affiliated) VALUES(%s, %s, %s, %s, %s, 1)"""
     params = (name, email, position, country, organisation)
 
-    req.write(args)
-    #_register(req, query_string, params, email)
+    _register(req, query_string, params, email)
 
 
-def register_not_associated(req, form, name, email, position, country, organisation, description):
+def register_not_associated(req, name, email, position, country, organisation, description):
     query_string = """INSERT INTO registration(name, email, position, country, organisation, is_affiliated, description) VALUES(%s, %s, %s, %s, %s, 0, %s)"""
     params = (name, email, position, country, organisation, description)
 
-    #_register(req, query_string, params, email)
+    _register(req, query_string, params, email)
 
 
 def registration_admin(req):
@@ -961,8 +959,27 @@ def registration_admin(req):
     req.write("<table>")
     req.write("<thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Is affiliated</th><th>Description</th><th>Is accepted</th></tr>")
     for reg in regs:
+        try:
+            int(reg[4])
+            country = run_sql("Select name from country where id=%s", (reg[4],))[0][0]
+        except:
+            country = reg[4]
+        try:
+            int(reg[5])
+            org = run_sql("Select name from institution where id=%s", (reg[5],))[0][0]
+        except:
+            org = reg[5]
+
         req.write("<tr>")
-        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % reg)
+        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % (reg[0],
+                  reg[1],
+                  reg[2],
+                  reg[3],
+                  country,
+                  org,
+                  reg[6],
+                  reg[7],
+                  reg[8]))
         req.write("</tr>")
     req.write("</table>")
 

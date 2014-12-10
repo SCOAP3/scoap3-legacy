@@ -102,40 +102,37 @@
                 <div class="entry-content">
                     <p>The SCOAP3 API offers a pilot service to the <a href="http://scoap3.org/participating-countries">SCOAP3 partners</a>. All API calls require a token, which will be provided upon registration.</p>
 
-                    <h2>Step 1</h2>
                     <p>Are you affiliated with a SCOAP3 partner institution?</p>
                     <form>
                         <input type="radio" name="scoap3" value="1" onclick="scoap3_partner()">Yes
                         <input type="radio" name="scoap3" value="0" onclick="scoap3_partner()">No
                     </form>
 
-                    <h2>Step 2</h2>
-                        <p id="text_tmp">Please finish the step above.</p>
-                        <form id="form1" hidden action="/api.py/register_associated">
-                            <p>Please provide your contact details. We will send you your token.</p>
-                           <label>Name:</label>
-                           <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
-                            <label>E-mail:</label>
-                            <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
-                            <label>Position:</label>
-                            <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
-                            <label>Country:</label>
-                            <select onchange="load_organisations()" name="country" required><select><br/>
-                            <label>Organisation:</label>
-                            <select name="organisation" disabled required></select><br/>
-                            <input type="submit" value="Register">
-                        </form>
+                    <form id="form1" hidden action="/api.py/register_associated">
+                        <p>Please provide your contact details. We will send you your token.</p>
+                       <label>Name:</label>
+                       <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
+                        <label>E-mail:</label>
+                        <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
+                        <label>Position:</label>
+                        <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
+                        <label>Country:</label>
+                        <select onchange="load_organisations()" name="country" required><select><br/>
+                        <label>Organisation:</label>
+                        <select name="organisation" disabled required></select><br/>
+                        <input type="submit" value="Register">
+                    </form>
 
-                        <form id="form2" class="" hidden action="/api.py/register_not_associated">
-                            <p>Please explain why you would like access to the SCOAP3 API, and which application you have in mind. The SCOAP3 API is a pilot service for the SCOAP3 partners, but in certain cases we will contact you to discuss your ideas.</p>
-                            <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" reqiured><br/>
-                            <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" reqiured><br/>
-                            <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" reqiured><br/>
-                            <label>Country:</label><input type="text" name="country" maxlength="100" reqiured><br/>
-                            <label>Institution:</label><input type="text" name="organisation" maxlength="200" reqiured><br/>
-                            <label>Description:</label><textarea name="description" maxlength="5000" reqiured></textarea><br/>
-                            <input type="submit" value="Register">
-                        </form>
+                    <form id="form2" class="" hidden action="/api.py/register_not_associated">
+                        <p>Please explain why you would like access to the SCOAP3 API, and which application you have in mind. The SCOAP3 API is a pilot service for the SCOAP3 partners, but in certain cases we will contact you to discuss your ideas.</p>
+                        <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" reqiured><br/>
+                        <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" reqiured><br/>
+                        <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" reqiured><br/>
+                        <label>Country:</label><input type="text" name="country" maxlength="100" reqiured><br/>
+                        <label>Institution:</label><input type="text" name="organisation" maxlength="200" reqiured><br/>
+                        <label>Description:</label><textarea name="description" maxlength="5000" reqiured></textarea><br/>
+                        <input type="submit" value="Register">
+                    </form>
                 </div><!-- .entry-content -->
             </article><!-- #post-## -->
         </div><!-- #content -->
