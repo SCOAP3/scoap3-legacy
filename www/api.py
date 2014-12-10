@@ -1,6 +1,9 @@
 from invenio.dbquery import run_sql
 from invenio.webpage import pagefooteronly, pageheaderonly
 from invenio.urlutils import redirect_to_url
+from invenio.mailutils import send_email
+from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
+from invenio.webuser import collect_user_info
 import json
 
 
@@ -914,6 +917,11 @@ def _register(req, query_string, params, email):
     if not run_sql("SELECT id FROM registration WHERE email=%s", (email,)):
         try:
             run_sql(query_string, params)
+            subject = "Registration to SCOAP3 API"
+            content = """Thanks for your interest in the SCOAP3 API. We have received your request. We will be back to you within one working day.
+
+The SCOAP3 team."""
+            send_email("info@scoap3.org", email, subject=subject, content=content)
             redirect_to_url(req, "http://api.scoap3.org/registered")
         except:
             redirect_to_url(req, "http://api.scoap3.org/registration_error")
@@ -934,3 +942,26 @@ def register_not_associated(req, name, email, position, country, organisation, d
     params = (name, email, position, country, organisation, description)
 
     _register(req, query_string, params, email)
+
+
+def registration_admin(req):
+    user_info = collect_user_info(req)
+    if not acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
+        return redirect_to_url(req, "http://api.scoap3.org")
+
+    req.content_type = "text/html"
+    req.write(pageheaderonly("Registration admin", req=req))
+    req.write("<h1>Registration list</h1>")
+
+    regs = run_sql("SELECT * FROM registration")
+
+    req.write("<table>")
+    req.write("<thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Is affiliated</th><th>Description</th><th>Is accepted</th></tr>")
+    for reg in regs:
+        req.write("<tr>")
+        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % reg)
+        req.write("</tr>")
+    req.write("</table>")
+
+    req.write(pagefooteronly(req=req))
+    return ""
