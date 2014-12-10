@@ -4,6 +4,7 @@ from invenio.urlutils import redirect_to_url
 from invenio.mailutils import send_email
 from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
 from invenio.webuser import collect_user_info
+from invenio.webinterface_handler import wash_urlargd
 import json
 
 
@@ -930,18 +931,20 @@ The SCOAP3 team."""
         redirect_to_url(req, "http://api.scoap3.org/already_registered")
 
 
-def register_associated(req, name, email, position, country, organisation):
+def register_associated(req, form, name, email, position, country, organisation):
+    args = wash_urlargd(form, {'name': (str, None), 'email': (str, None), 'position': (str, "en"), 'country': (int, None), 'organisation': (int, None)})
     query_string = """INSERT INTO registration(name, email, position, country, organisation, is_affiliated) VALUES(%s, %s, %s, %s, %s, 1)"""
     params = (name, email, position, country, organisation)
 
-    _register(req, query_string, params, email)
+    req.write(args)
+    #_register(req, query_string, params, email)
 
 
-def register_not_associated(req, name, email, position, country, organisation, description):
+def register_not_associated(req, form, name, email, position, country, organisation, description):
     query_string = """INSERT INTO registration(name, email, position, country, organisation, is_affiliated, description) VALUES(%s, %s, %s, %s, %s, 0, %s)"""
     params = (name, email, position, country, organisation, description)
 
-    _register(req, query_string, params, email)
+    #_register(req, query_string, params, email)
 
 
 def registration_admin(req):
@@ -959,7 +962,7 @@ def registration_admin(req):
     req.write("<thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Is affiliated</th><th>Description</th><th>Is accepted</th></tr>")
     for reg in regs:
         req.write("<tr>")
-        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % reg)
+        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % reg)
         req.write("</tr>")
     req.write("</table>")
 
