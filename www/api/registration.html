@@ -16,8 +16,8 @@
         $.getJSON( "http://api.scoap3.org/api.py/get_countries", function( data ) {
             var items = [];
             items.push( "<option value=''>Select one</option>" );
-            $.each( data, function( key, val ) {
-                items.push( "<option value='" + val + "'>" + key + "</option>" );
+            $.each( data, function( index, val ) {
+                items.push( "<option value='" + val[1] + "'>" + val[0] + "</option>" );
             });
             $("select[name=country]").append(items);
         });
@@ -38,7 +38,7 @@
                 var items = [];
                 items.push( "<option value=''>Select one</option>" );
                 $.each( data, function( key, val ) {
-                    items.push( "<option value='" + key + "'>" + val + "</option>" );
+                    items.push( "<option value='" + val[0] + "'>" + val[1] + "</option>" );
                 });
                 $("select[name=organisation]").empty();
                 if (items){
@@ -53,9 +53,18 @@
     <style type="text/css">
         label {
             display:inline-block;
-            width:80px;
+            width:85px;
             margin:0 5px 10px 0;
             text-align: right;
+        }
+        label strong{
+            color:red;
+        }
+        textarea{
+            width: 500px;
+        }
+        input[type=submit]{
+            margin: 5px 0 0 94px;
         }
     </style>
 </head>
@@ -110,27 +119,35 @@
 
                     <form id="form1" hidden action="/api.py/register_associated">
                         <p>Please provide your contact details. We will send you your token.</p>
-                       <label>Name:</label>
-                       <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
-                        <label>E-mail:</label>
+                        <label style="width: 10px;"><strong>*</strong></label> - mandatory field<br>
+                        <label>Name<strong>*</strong>:</label>
+                        <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
+                        <label>E-mail<strong>*</strong>:</label>
                         <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
-                        <label>Position:</label>
+                        <label>Position<strong>*</strong>:</label>
                         <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
-                        <label>Country:</label>
+                        <label>Country<strong>*</strong>:</label>
                         <select onchange="load_organisations()" name="country" required><select><br/>
-                        <label>Organisation:</label>
+                        <label>Organisation<strong>*</strong>:</label>
                         <select name="organisation" disabled required></select><br/>
                         <input type="submit" value="Register">
                     </form>
 
                     <form id="form2" class="" hidden action="/api.py/register_not_associated">
                         <p>Please explain why you would like access to the SCOAP3 API, and which application you have in mind. The SCOAP3 API is a pilot service for the SCOAP3 partners, but in certain cases we will contact you to discuss your ideas.</p>
-                        <label>Name:</label><input type="text" name="name" maxlength="100" placeholder="John Doe" reqiured><br/>
-                        <label>E-mail:</label><input type="email" name="email" maxlength="100" placeholder="example@site.com" reqiured><br/>
-                        <label>Position:</label><input type="text" name="position" maxlength="100" placeholder="Librarian" reqiured><br/>
-                        <label>Country:</label><input type="text" name="country" maxlength="100" reqiured><br/>
-                        <label>Institution:</label><input type="text" name="organisation" maxlength="200" reqiured><br/>
-                        <label>Description:</label><textarea name="description" maxlength="5000" reqiured></textarea><br/>
+                        <label style="width: 10px;"><strong>*</strong></label> - mandatory field<br>
+                        <label>Name<strong>*</strong>:</label>
+                        <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
+                        <label>E-mail<strong>*</strong>:</label>
+                        <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
+                        <label>Position<strong>*</strong>:</label>
+                        <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
+                        <label>Country<strong>*</strong>:</label>
+                        <input type="text" name="country" maxlength="100" required><br/>
+                        <label>Organisation<strong>*</strong>:</label>
+                        <input type="text" name="organisation" maxlength="200" required><br/>
+                        <label>Description<strong>*</strong>:</label>
+                        <textarea name="description" maxlength="5000" required></textarea><br/>
                         <input type="submit" value="Register">
                     </form>
                 </div><!-- .entry-content -->

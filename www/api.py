@@ -899,7 +899,6 @@ def _prepare_institut_db():
 
 def get_countries(req):
     countries = run_sql("SELECT name, id from country ORDER BY name")
-    countries = dict((key, value) for (key, value) in countries)
     req.content_type = "application/json"
     json.dump(countries, req)
 
@@ -907,9 +906,7 @@ def get_countries(req):
 def get_organisation(req, country_id=""):
     req.content_type = "application/json"
     if country_id:
-        #country_id = run_sql("SELECT id FROM country WHERE name = %s", (country,))
         org = run_sql("SELECT id, name FROM institution WHERE country_id = %s ORDER BY name", (country_id,))
-        org = dict((key, value) for (key, value) in org)
         json.dump(org, req)
 
 
