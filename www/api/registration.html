@@ -66,6 +66,10 @@
         input[type=submit]{
             margin: 5px 0 0 94px;
         }
+        .note {
+            font-size: 0.8em;
+            color: grey;
+        }
     </style>
 </head>
 
@@ -121,13 +125,14 @@
                         <label>Name<strong>*</strong>:</label>
                         <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
                         <label>E-mail<strong>*</strong>:</label>
-                        <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
+                        <input type="email" name="email" maxlength="100" placeholder="example@site.com" required>
+                        <span class="note">(please use your institutional e-mail address)</span><br/>
                         <label>Position<strong>*</strong>:</label>
                         <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
                         <label>Country<strong>*</strong>:</label>
-                        <select onchange="load_organisations()" name="country" required><select><br/>
+                        <select name="country" required><select><br/>
                         <label>Organisation<strong>*</strong>:</label>
-                        <select name="organisation" disabled required></select><br/>
+                        <input type="text" name="organisation" maxlength="200" required><br/>
                         <input type="submit" value="Register">
                     </form>
 
@@ -137,7 +142,8 @@
                         <label>Name<strong>*</strong>:</label>
                         <input type="text" name="name" maxlength="100" placeholder="John Doe" required><br/>
                         <label>E-mail<strong>*</strong>:</label>
-                        <input type="email" name="email" maxlength="100" placeholder="example@site.com" required><br/>
+                        <input type="email" name="email" maxlength="100" placeholder="example@site.com" required>
+                        <span class="note">(please use your institutional e-mail address)</span><br/>
                         <label>Position<strong>*</strong>:</label>
                         <input type="text" name="position" maxlength="100" placeholder="Librarian" required><br/>
                         <label>Country<strong>*</strong>:</label>
