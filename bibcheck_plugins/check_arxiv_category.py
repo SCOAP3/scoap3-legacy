@@ -7,22 +7,27 @@ from invenio.bibrecord import create_record
 
 def _query_arxiv_with_id(id):
     url = 'http://export.arxiv.org/api/query?search_query=id:{0}'
-    data = urllib.urlopen(url.format(id)).read()
+    try:
+        data = urllib.urlopen(url.format(id)).read()
+    except:
+        data = None
     return data
 
 
 def _get_arxiv_category(id):
     result = []
     data = _query_arxiv_with_id(id)
-    xml = parseString(data)
 
-    for tag in xml.getElementsByTagName('category'):
-        try:
-            result.append(tag.attributes['term'].value)
-        except KeyError:
-            pass
-
-    return result
+    if data:
+        xml = parseString(data)
+        for tag in xml.getElementsByTagName('category'):
+            try:
+                result.append(tag.attributes['term'].value)
+            except KeyError:
+                pass
+        return result
+    else:
+        return None
 
 
 def _get_arxiv_id_from_record(record):
@@ -83,11 +88,13 @@ def check_records(records, empty=False):
 
         if arxiv_id:
             categories = _get_arxiv_category(arxiv_id)
-            val = string.format(int(any(filter(lambda x: 'hep' in x,
-                                               categories))))
-            if _has_category_field(record):
-                position = _get_category_position(record)
-                record.amend_field(position, val, '')
+            if categories:
+                val = string.format(int(any(filter(lambda x: 'hep' in x,
+                                                   categories))))
+                if _has_category_field(record):
+                    position = _get_category_position(record)
+                    record.amend_field(position, val, '')
+                else:
+                    record.add_field('591__a', value='', subfields=[('a', val)])
             else:
-                record.add_field('591__a', value='', subfields=[('a', val)])
-
+                record.warn("Problem checking arXiv category.")
