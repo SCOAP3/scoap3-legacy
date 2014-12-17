@@ -954,7 +954,7 @@ def registration_admin(req):
     regs = run_sql("SELECT * FROM registration")
 
     req.write("<table>")
-    req.write("<thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Is affiliated</th><th>Description</th><th>Is accepted</th></tr>")
+    req.write("<thead><tr><th>ID</th><th>Registration date</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Is affiliated</th><th>Description</th><th>Is accepted</th></tr>")
     for reg in regs:
         try:
             int(reg[4])
@@ -968,8 +968,9 @@ def registration_admin(req):
             org = reg[5]
 
         req.write("<tr>")
-        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % (reg[0],
+        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % (reg[0],
                   reg[1],
+                  reg[9],
                   reg[2],
                   reg[3],
                   country,
