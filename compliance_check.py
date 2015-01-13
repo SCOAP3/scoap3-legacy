@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 ## This file is part of Invenio.
-## Copyright (C) 2013 CERN.
+## Copyright (C) 2014, 2015 CERN.
 ##
 ## Invenio is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -40,6 +40,12 @@ def add_fields(record, field, subfield, value_dict):
                          subfields=[(subfield, '%s:%d' % (key, value))])
 
 
+def delete_fields(record, field, subfield):
+    if field in record:
+        for position, value in record.iterfield(field + '__' + subfield):
+            record.delete_field(position)
+
+
 def check_records(records, empty=False):
     path = join(CFG_PYLIBDIR,
                 'invenio/bibcheck_plugins/compliance_check_configs/')
@@ -49,7 +55,5 @@ def check_records(records, empty=False):
 
     for record in records:
         dic = checks.check(record)
-        if '591' in record:
-            amend_fields(record, '591__a', dic, 'Checking compliance')
-        else:
-            add_fields(record, '591__a', 'a', dic)
+        delete_fields(record, '591', 'a')
+        add_fields(record, '591__a', 'a', dic)

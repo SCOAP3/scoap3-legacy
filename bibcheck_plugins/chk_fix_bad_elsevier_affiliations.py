@@ -146,13 +146,17 @@ def delete_fields(record, fields):
 def check_records(records, empty=False):
     fields = ['100', '700']
     filepath = "/opt/invenio/var/data/files/g0/"
+    filepath2 = "/opt/invenio/var/data/files/g1/"
     first_author = True
 
     for record in records:
         if is_elsevier(record):
             doc_ids = get_doc_ids(int(record.record_id))
             for doc_id in doc_ids:
-                latest_file = get_latest_file(filepath + str(doc_id) + '/')
+                try:
+                    latest_file = get_latest_file(filepath + str(doc_id) + '/')
+                except:
+                    latest_file = get_latest_file(filepath2 + str(doc_id) + '/')
                 xml = parse(latest_file)
                 authors = get_authors(xml)
 

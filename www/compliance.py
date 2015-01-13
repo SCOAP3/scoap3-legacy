@@ -35,10 +35,11 @@ def get_compliance_values():
         rec = get_record(recid)
         if '591' in rec:
             for field in rec['591']:
-                str_val = field[0][0][1]
-                key = str_val[:str_val.find(':')].lower()
-                val = int(str_val[str_val.find(':')+1:])
-                tmpdic[key] = val
+                if field[0]:
+                    str_val = field[0][0][1]
+                    key = str_val[:str_val.find(':')].lower()
+                    val = int(str_val[str_val.find(':')+1:])
+                    tmpdic[key] = val
             compliance_check_values[recid] = tmpdic
 
 
