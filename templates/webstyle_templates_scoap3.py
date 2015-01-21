@@ -188,7 +188,7 @@ template function generated it.
  <tr>
   <td align="right" valign="top" colspan="12">
   <div class="headerboxbodylogo">
-   <a href="%(cssurl)s/?ln=%(ln)s">SCOAP<sup>3</sup> Repository (&beta;eta)</a>
+   <a href="%(cssurl)s/?ln=%(ln)s">SCOAP<sup>3</sup> Repository</a>
   </div>
   </td>
  </tr>
