@@ -30,6 +30,8 @@ from invenio.bibrecord import record_get_field_value
 from invenio.dbquery import run_sql
 from invenio.utils import NATIONS_DEFAULT_MAP, multi_replace, get_doi
 
+import re
+
 _AFFILIATIONS = (sorted(list(set(NATIONS_DEFAULT_MAP.values())))
                  + ['HUMAN CHECK'])
 
@@ -403,45 +405,47 @@ def usa_papers_csv(req):
         print >> req, ""
 
 
-def papers_by_country_csv(req):
+def papers_by_country_csv(req, country):
     req.content_type = 'text/csv; charset=utf-8'
     req.headers_out['content-disposition'] = ('attachment; '
-                                              'filename=usa_papers.csv')
+                                              'filename=papers_by_country.csv')
 
     ## print the list of linkt to the articles
-    for country in NATIONS_DEFAULT_MAP.itervalues():
-        count = 1
-        print >> req, country
-        search = "100__w:%s OR 700__w:%s" % (country, country)
-        res = perform_request_search(p='%s' % (search,))
-        print >> req, "#;Title; Author; Journal; DOI; Inspire record"
-        if len(res):
-            for rec_id in res:
-                author_count = 10
-                rec = get_record(rec_id)
-                title = ''
-                authors = ''
-                journal = ''
-                doi = ''
-                inspire_record = ''
-                if '254' in rec:
-                    title = rec['245'][0][0][0][1]
-                if '100' in rec:
-                    authors = rec['100'][0][0][0][1]
-                if '700' in rec:
-                    for auth in rec['700']:
-                        if author_count:
-                            authors += "; %s" % (auth[0][0][1],)
-                            author_count -= 1
-                for sub in rec['773'][0][0]:
-                    if 'p' in sub[0]:
-                        journal = sub[1]
-                doi = get_doi(rec_id)
-                if '035' in rec:
-                    for i in rec['035']:
-                        if '9' in i:
-                            if i[0] == 'INSPIRE':
-                                inspire_record = i[1]
-                print >> req, "%s; %s; %s; %s; %s; %s" % (count, title, authors, journal, doi, inspire_record)
-                count += 1
-        print >> req, ""
+    count = 1
+    print >> req, country
+    search = "100__w:%s OR 700__w:%s" % (country, country)
+    res = perform_request_search(p='%s' % (search,))
+    print >> req, "#;Title;Author;Journal;DOI;Inspire record"
+    if len(res):
+        for rec_id in res:
+            author_count = 11
+            rec = get_record(rec_id)
+            title = ''
+            authors = ''
+            journal = ''
+            doi = ''
+            inspire_record = ''
+            if '245' in rec:
+                title = re.sub("<.*?>", "", rec['245'][0][0][0][1])
+            if '100' in rec:
+                authors = rec['100'][0][0][0][1]
+            if '700' in rec:
+                for auth in rec['700']:
+                    if author_count > 1:
+                        authors += " / %s" % (auth[0][0][1],)
+                        author_count -= 1
+                    elif author_count == 1:
+                        authors += " / et al"
+                        author_count -= 1
+                    else:
+                        break
+            for sub in rec['773'][0][0]:
+                if 'p' in sub[0]:
+                    journal = sub[1]
+            doi = get_doi(rec_id)
+            if '035' in rec:
+                for f in rec['035'][0][0]:
+                    if 'a' in f:
+                        inspire_record = 'http://inspirehep.net/record/%s' % (f[1],)
+            print >> req, "%s;%s;%s;%s;%s;%s" % (count, title, authors, journal, doi, inspire_record)
+            count += 1
