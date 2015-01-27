@@ -37,6 +37,8 @@ from invenio.dateutils import (convert_datecvs_to_datestruct,
                                convert_datestruct_to_dategui)
 from invenio.htmlutils import HTMLWasher
 from invenio.webstyle_templates import Template as DefaultTemplate
+from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
+from invenio.webuser import collect_user_info
 
 
 class Template(DefaultTemplate):
@@ -319,8 +321,15 @@ template function generated it.
         else:
             msg_lastupdated = ""
 
+        user_info = collect_user_info(req)
+        if acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
+            tools = "<a href='/tools.py'>Repository tools</a>"
+        else:
+            tools = None
+
         out = """
 <div class="pagefooter">
+%(tools)s
 %(pagefooteradd)s
 <!-- replaced page footer -->
  <div class="pagefooterstripeleft">
@@ -385,6 +394,7 @@ template function generated it.
           'version': CFG_VERSION,
 
           'pagefooteradd': pagefooteradd,
+          'tools':tools,
         }
         return out
 

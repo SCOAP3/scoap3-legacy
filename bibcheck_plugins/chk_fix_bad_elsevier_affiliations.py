@@ -176,7 +176,11 @@ def check_records(records, empty=False):
                     latest_file = get_latest_file(filepath + str(doc_id) + '/')
                 except:
                     latest_file = get_latest_file(filepath2 + str(doc_id) + '/')
-                xml = parse(latest_file)
+                try:
+                    xml = parse(latest_file)
+                except:
+                    record.warn("Problem parssing XML file. Aborting")
+                    break
                 authors = get_authors(xml)
 
                 delete_fields(record, fields)

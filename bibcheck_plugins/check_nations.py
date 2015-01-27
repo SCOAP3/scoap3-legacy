@@ -44,14 +44,28 @@ def find_nations(field, subfields):
     return result
 
 
+def get_current_countries(field):
+    current_countries = []
+    for f in field:
+        if 'w' in f:
+            for ff in f:
+                if ff is not 'w':
+                    current_countries.append(ff)
+    return sorted(list(set(current_countries)))
+
+
 def check_records(records, empty=False):
     fields = ['100', '700']
 
     for record in records:
         for field in fields:
             if field in record:
-                for position, value in record.iterfield(field + '__w'):
-                    record.delete_field(position)
                 for i, x in enumerate(record[field]):
-                    for val in find_nations(x[0], ['u', 'v']):
-                        record.add_subfield((field + '__w', i, 0), 'w', val)
+                    new_countries = find_nations(x[0], ['u', 'v'])
+                    current_countries = get_current_countries(x[0])
+
+                    if new_countries is not current_countries:
+                        for position, value in record.iterfield(field + '__w'):
+                            record.delete_field(position)
+                        for val in new_countries:
+                            record.add_subfield((field + '__w', i, 0), 'w', val)

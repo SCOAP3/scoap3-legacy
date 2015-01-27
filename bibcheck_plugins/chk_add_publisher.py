@@ -23,16 +23,16 @@ Add publisher information
 from invenio.bibrecord import record_get_field_value
 
 CFG_JOURNAL_TO_PUBLISHER_MAP = {
-    'Physics Letters B': 'Elsevier',
-    'Nuclear Physics B': 'Elsevier',
-    'Advances in High Energy Physics': 'Hindawi Publishing Corporation',
-    'Chinese Phys. C': 'Institute of Physics Publishing/Chinese Academy of Sciences',
-    'JCAP': 'Institute of Physics Publishing/SISSA',
-    'New J. Phys.': 'Institute of Physics Publishing/Deutsche Physikalische Gesellschaft',
-    'Acta Physica Polonica B': 'Jagiellonian University',
-    'PTEP': 'Oxford University Press/Physical Society of Japan',
-    'EPJC': 'Springer/Società Italiana di Fisica',
-    'JHEP': 'Springer/SISSA',
+    'physics letters b': 'Elsevier',
+    'nuclear physics b': 'Elsevier',
+    'advances in high energy physics': 'Hindawi Publishing Corporation',
+    'chinese phys. c': 'Institute of Physics Publishing/Chinese Academy of Sciences',
+    'jcap': 'Institute of Physics Publishing/SISSA',
+    'new j. phys.': 'Institute of Physics Publishing/Deutsche Physikalische Gesellschaft',
+    'acta physica polonica b': 'Jagiellonian University',
+    'ptep': 'Oxford University Press/Physical Society of Japan',
+    'epjc': 'Springer/Società Italiana di Fisica',
+    'jhep': 'Springer/SISSA',
 }
 
 def check_records(records):
@@ -43,7 +43,7 @@ def check_records(records):
         journal = record_get_field_value(record, '773', code='p')
         publisher = record_get_field_value(record, '260', code='b')
         if not publisher:
-            if journal not in CFG_JOURNAL_TO_PUBLISHER_MAP:
+            if journal.lower() not in CFG_JOURNAL_TO_PUBLISHER_MAP:
                 record.warn("Unknown journal: %s" % journal)
                 continue
             else:
