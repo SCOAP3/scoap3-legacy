@@ -65,7 +65,12 @@ def check_records(records, empty=False):
                     current_countries = get_current_countries(x[0])
 
                     if new_countries is not current_countries:
-                        for position, value in record.iterfield(field + '__w'):
-                            record.delete_field(position)
+                        ## FIXME
+                        for key, val in enumerate(x[0]):
+                            if "w" in val:
+                                del x[0][key]
+                                record.set_amended('Adding new countries')
+                        # for position, value in record.iterfield(field + '__w'):
+                        #     record.delete_field(position)
                         for val in new_countries:
                             record.add_subfield((field + '__w', i, 0), 'w', val)

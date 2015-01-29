@@ -40,10 +40,10 @@ def check_records(records):
     Add publisher if missing
     """
     for record in records:
-        journal = record_get_field_value(record, '773', code='p')
+        journal = record_get_field_value(record, '773', code='p').lower()
         publisher = record_get_field_value(record, '260', code='b')
         if not publisher:
-            if journal.lower() not in CFG_JOURNAL_TO_PUBLISHER_MAP:
+            if journal not in CFG_JOURNAL_TO_PUBLISHER_MAP:
                 record.warn("Unknown journal: %s" % journal)
                 continue
             else:
