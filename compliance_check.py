@@ -32,18 +32,19 @@ def amend_fields(record, field, changes_dict, comment=''):
                                comment)
 
 
-def add_fields(record, field, subfield, value_dict):
+def add_fields(record, field, subfield, value_dict, existing_values):
     """record : AmendableRecord"""
+    ## FIXME
     for key, value in value_dict.iteritems():
-        record.add_field(field,
-                         value="",
-                         subfields=[(subfield, '%s:%d' % (key, value))])
-
-
-def delete_fields(record, field, subfield):
-    if field in record:
-        for position, value in record.iterfield(field + '__' + subfield):
-            record.delete_field(position)
+        if key in [x[1].split(':')[0] for x in existing_values]:
+            for position, val in existing_values:
+                if key in val:
+                    record.amend_field(position, '%s:%d' % (key, value))
+                    break
+        else:
+            record.add_field(field,
+                             value="",
+                             subfields=[(subfield, '%s:%d' % (key, value))])
 
 
 def check_records(records, empty=False):
@@ -54,6 +55,8 @@ def check_records(records, empty=False):
                                  regex_search_delimiter='//')
 
     for record in records:
+        fields = []
+        for position, value in record.iterfield('591__a'):
+            fields.append((position, value))
         dic = checks.check(record)
-        delete_fields(record, '591', 'a')
-        add_fields(record, '591__a', 'a', dic)
+        add_fields(record, '591__a', 'a', dic, fields)
