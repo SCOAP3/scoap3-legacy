@@ -135,7 +135,10 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Slovakia": "Slovakia",
                        #######################
                        "Slovenia": "Slovenia",
+                       ##########SOUTH AFRICA########
                        "South Africa": "South Africa",
+                       "Africa": "South Africa",
+                       ##############################
                        "Spain": "Spain",
                        "Sweden": "Sweden",
                        "Switzerland": "Switzerland",
