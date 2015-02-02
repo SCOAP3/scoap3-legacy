@@ -413,7 +413,7 @@ def papers_by_country_csv(req, country):
     ## print the list of linkt to the articles
     count = 1
     print >> req, country
-    search = "100__w:%s OR 700__w:%s" % (country, country)
+    search = "100__w:'%s' OR 700__w:'%s'" % (country, country)
     res = perform_request_search(p='%s' % (search,))
     print >> req, "#;Title;Author;Journal;DOI;Inspire record"
     if len(res):
