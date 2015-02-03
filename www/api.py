@@ -4,6 +4,7 @@ from invenio.urlutils import redirect_to_url
 from invenio.mailutils import send_email
 from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
 from invenio.webuser import collect_user_info
+from invenio.web_api_key import create_new_web_api_key
 import json
 
 
@@ -942,44 +943,113 @@ def register_not_associated(req, name, email, position, country, organisation, d
     _register(req, query_string, params, email)
 
 
-def registration_admin(req):
+def registration_admin(req, message=""):
     user_info = collect_user_info(req)
     if not acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
         return redirect_to_url(req, "http://api.scoap3.org")
 
     req.content_type = "text/html"
     req.write(pageheaderonly("Registration admin", req=req))
+
+    if message:
+        req.write("<strong>%s</strong>" % (message,))
     req.write("<h1>Registration list</h1>")
 
-    regs = run_sql("SELECT * FROM registration")
+    regs = run_sql("SELECT * FROM registration", with_dict=True)
 
     req.write("<table>")
-    req.write("<thead><tr><th>ID</th><th>Registration date</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Is affiliated</th><th>Description</th><th>Is accepted</th></tr>")
+    req.write("<thead><tr><th>ID</th><th>Registration date</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Affiliated?</th><th>Desc.</th><th>Is accepted</th></tr>")
+    count = 1
     for reg in regs:
         try:
-            int(reg[4])
-            country = run_sql("Select name from country where id=%s", (reg[4],))[0][0]
+            int(reg['country'])
+            country = run_sql("Select name from country where id=%s", (reg['country'],))[0][0]
         except:
-            country = reg[4]
+            country = reg['country']
         try:
-            int(reg[5])
-            org = run_sql("Select name from institution where id=%s", (reg[5],))[0][0]
+            int(reg['organisation'])
+            org = run_sql("Select name from institution where id=%s", (reg['organisation'],))[0][0]
         except:
-            org = reg[5]
+            org = reg['organisation']
 
         req.write("<tr>")
-        req.write("<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>" % (reg[0],
-                  reg[1],
-                  reg[9],
-                  reg[2],
-                  reg[3],
-                  country,
-                  org,
-                  reg[6],
-                  reg[7],
-                  reg[8]))
+        req.write("<td>%(id)s</td><td>%(date)s</td><td>%(name)s</td><td>%(email)s</td><td>%(position)s</td><td>%(country)s</td><td>%(org)s</td><td>%(is_aff)s</td><td>%(desc)s</td>"
+                  % {'id': count,
+                     'date': reg['created'],
+                     'name': reg['name'],
+                     'email': reg['email'],
+                     'position': reg['position'],
+                     'country': country,
+                     'org': org,
+                     'is_aff': 'Yes' if reg['is_affiliated'] else 'No',
+                     'desc': reg['description']})
+        if not reg['is_accepted']:
+            req.write("<td><a href='/api.py/accept_registration?registration_id=%(id)s'>Accept</td>" % {'id': reg['id']})
+        else:
+            req.write("<td>Yes</td>")
         req.write("</tr>")
+        count += 1
     req.write("</table>")
 
     req.write(pagefooteronly(req=req))
     return ""
+
+
+def _get_user_keys(user_id):
+    latest_key = run_sql("SELECT id, secret FROM webapikey WHERE id_user=%s", (user_id,), with_dict=True)[-1]
+    return latest_key
+
+
+def accept_registration(req, registration_id):
+    user_info = collect_user_info(req)
+    if not acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
+        return redirect_to_url(req, "http://api.scoap3.org")
+
+    message = ''
+    if registration_id:
+        registration = run_sql("SELECT * from registration where id=%s", (registration_id,), with_dict=True)[0]
+        # Creating user if not exist
+        user_id = run_sql("Select id from user where email=%s", (registration['email'],), with_dict=True)
+        if user_id:
+            user_id = user_id[0]['id']
+            message = "Email %s is already registered. Creating new API key.<br>" % (registration['email'],)
+        else:
+            user_id = run_sql("INSERT INTO user (email, password, note) values(%s ,AES_ENCRYPT(email,'inspire_scoap3'), '1')", (registration['email'],))
+        # Crearing API keys
+        create_new_web_api_key(user_id, "api")
+        # sending email
+        keys = _get_user_keys(user_id)
+        email_content = """
+Hi,<br>
+<br>
+Thank you for registering. Please find you API keys below. Remember that you should never share you private key with anyone. SCOAP3 support will never ask you for it.<br>
+<br>
+public key: %(public)s<br>
+private key: %(private)s<br>
+<br>
+Documentation on how to use API can be found at <a href='http://scoap3.org/scoap3-repository/xml-api#key'>SCOAP3 XML API</a>.<br>
+<br>
+In case of problems do not hesitate to contact us.<br>
+<br>
+​Best regards,<br>
+    SCOAP3 team
+""" % {'public': keys['id'], 'private': keys['secret']}
+
+        try:
+            send_email("info@scoap3.org",
+                       registration['email'],
+                       subject="SCOAP3 Repository API key",
+                       html_content=email_content,
+                       header='',
+                       footer='',
+                       html_header='',
+                       html_footer='',
+                       bccaddr='repo.admin@scoap3.org')
+            message += "The registration for %s was accepted." % (registration['email'],)
+            run_sql("update registration set is_accepted=1 where id=%s", (registration_id,))
+        except:
+            message += "Failed to send email to the %s!" % (registration['email'],)
+    else:
+        message += "You need to specify registration ID."
+
+    return redirect_to_url(req, "http://api.scoap3.org/api.py/registration_admin?message=%s" % (message,))
