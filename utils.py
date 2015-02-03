@@ -41,6 +41,8 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Brazil": "Brazil",
                        "Brasil": "Brazil",
                        ######################
+                       "Benin": "Republic of Benin",
+                       "Bénin": "Republic of Benin",
                        "Bulgaria": "Bulgaria",
                        "Canada": "Canada",
                        ##########CERN########
@@ -105,6 +107,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Montenegro": "Montenegro",
                        "Morocco": "Morocco",
                        "Niger": "Niger",
+                       "Nigeria": "Nigeria",
                        ##########NETHERLANDS########
                        "Netherlands": "Netherlands",
                        "The Netherlands": "Netherlands",

@@ -25,11 +25,16 @@ def find_nations(field, subfields):
     for x in field:
         if x[0] in subfields:
             for delimiter in [',', ' ']:
-                values = [y.replace('.', '').lower().strip() for y in x[1].split(delimiter)]
+                values = [y.replace('.', '').lower().strip() for y in x[1].replace('\n', ' ').split(delimiter)]
                 possible_affs = filter(lambda y: y is not None,
                                        map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
                 if possible_affs:
                     break
+            if not possible_affs:
+                possible_affs = []
+                for country in NATIONS_DEFAULT_MAP.itervalues():
+                    if country.lower() in x[1].lower().replace('\n', ' '):
+                        possible_affs.append(country)
             if not possible_affs:
                 possible_affs = ['HUMAN CHECK']
             if 'CERN' in possible_affs and 'Switzerland' in possible_affs:
