@@ -972,6 +972,14 @@ def registration_admin(req, message=""):
         except:
             org = reg['organisation']
 
+        key = ""
+        if reg['is_accepted']:
+            try:
+                user_id = run_sql("Select id from user where email=%s", (reg['email'],), with_dict=True)[0]['id']
+                key = _get_user_keys(user_id)['id']
+            except:
+                key = "Error"
+
         req.write("<tr>")
         req.write("<td>%(id)s</td><td>%(date)s</td><td>%(name)s</td><td>%(email)s</td><td>%(position)s</td><td>%(country)s</td><td>%(org)s</td><td>%(is_aff)s</td><td>%(desc)s</td>"
                   % {'id': count,
@@ -986,7 +994,7 @@ def registration_admin(req, message=""):
         if not reg['is_accepted']:
             req.write("<td><a href='/api.py/accept_registration?registration_id=%(id)s'>Accept</td>" % {'id': reg['id']})
         else:
-            req.write("<td>Yes</td>")
+            req.write("<td>Yes: %s</td>" % (key))
         req.write("</tr>")
         count += 1
     req.write("</table>")
