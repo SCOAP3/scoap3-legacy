@@ -18,18 +18,16 @@
 ## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 from invenio.utils import NATIONS_DEFAULT_MAP
+import re
 
 
 def find_nations(field, subfields):
     result = []
     for x in field:
         if x[0] in subfields:
-            for delimiter in [',', ' ']:
-                values = [y.replace('.', '').lower().strip() for y in x[1].replace('\n', ' ').split(delimiter)]
-                possible_affs = filter(lambda y: y is not None,
-                                       map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
-                if possible_affs:
-                    break
+            values = [y.replace('.', '').lower().strip() for y in re.findall(r"[\w']+", x[1].lower())]
+            possible_affs = filter(lambda y: y is not None,
+                                   map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
             if not possible_affs:
                 possible_affs = []
                 for country in NATIONS_DEFAULT_MAP.itervalues():
@@ -47,6 +45,7 @@ def find_nations(field, subfields):
     result = sorted(list(set(result)))
 
     return result
+
 
 
 def get_current_countries(field):
