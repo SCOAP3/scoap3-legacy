@@ -195,7 +195,12 @@ template function generated it.
   </td>
  </tr>
  <tr style="background-color: #679A70;">
-  <td style="padding: 10px; font-size: medium; color: #FFF;"><a href="/" style="text-decoration: none; color: #FFF;">HOME</a> :: <a href="http://scoap3.org/" style="text-decoration: none; color: #FFF;">SCOAP<sup>3</sup></a> :: <a href="http://scoap3.org/scoap3-repository-help" style="text-decoration: none; color: #FFF;">HELP</a> :: <a href="http://scoap3.org/scoap3-repository" style="text-decoration: none; color: #FFF;">ABOUT</a></td>
+  <td style="padding: 10px; font-size: medium; color: #FFF;">
+    <a href="/" style="text-decoration: none; color: #FFF;">HOME</a> ::
+    <a href="http://scoap3.org/" style="text-decoration: none; color: #FFF;">SCOAP<sup>3</sup></a> ::
+    <a href="http://scoap3.org/scoap3-repository-help" style="text-decoration: none; color: #FFF;">HELP</a> ::
+    <a href="http://scoap3.org/scoap3-repository" style="text-decoration: none; color: #FFF;">ABOUT</a> ::
+    <a href="http://scoap3.org/scoap3-repository/ideas" target="_blank" style="text-decoration: none; color: #FFF;">IDEA BOARD</a></td>
  </tr>
  <!--
  <tr class="menu">
@@ -325,11 +330,10 @@ template function generated it.
         if acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
             tools = "<a href='/tools.py'>Repository tools</a>"
         else:
-            tools = None
+            tools = ""
 
         out = """
 <div class="pagefooter">
-%(tools)s
 %(pagefooteradd)s
 <!-- replaced page footer -->
  <div class="pagefooterstripeleft">
@@ -341,6 +345,8 @@ template function generated it.
   %(msg_maintainedby)s <a class="footer" href="mailto:%(sitesupportemail)s">%(sitesupportemail)s</a>
   <br />
   %(msg_lastupdated)s
+  <br />
+  %(tools)s
  </div>
  <div class="pagefooterstriperight">
  <p><em>
@@ -394,7 +400,7 @@ template function generated it.
           'version': CFG_VERSION,
 
           'pagefooteradd': pagefooteradd,
-          'tools':tools,
+          'tools': tools,
         }
         return out
 
