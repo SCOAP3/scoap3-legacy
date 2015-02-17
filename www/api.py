@@ -992,9 +992,10 @@ def registration_admin(req, message=""):
                      'is_aff': 'Yes' if reg['is_affiliated'] else 'No',
                      'desc': reg['description']})
         if not reg['is_accepted']:
-            req.write("<td><a href='/api.py/accept_registration?registration_id=%(id)s'>Accept</td>" % {'id': reg['id']})
+            req.write("<td><a href='/api.py/accept_registration?registration_id=%(id)s'>Accept</a>" % {'id': reg['id']})
         else:
-            req.write("<td>Yes: %s</td>" % (key))
+            req.write("<td>Yes: %s" % (key))
+        req.write(" <a href='/api.py/delete_registration?registration_id=%(id)s'>Delete</a></td>" % {'id': reg['id']})
         req.write("</tr>")
         count += 1
     req.write("</table>")
@@ -1057,6 +1058,38 @@ In case of problems do not hesitate to contact us.<br>
             run_sql("update registration set is_accepted=1 where id=%s", (registration_id,))
         except:
             message += "Failed to send email to the %s!" % (registration['email'],)
+    else:
+        message += "You need to specify registration ID."
+
+    return redirect_to_url(req, "http://api.scoap3.org/api.py/registration_admin?message=%s" % (message,))
+
+
+def delete_registration(req, registration_id):
+    user_info = collect_user_info(req)
+    if not acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
+        return redirect_to_url(req, "http://api.scoap3.org")
+
+    message = ''
+    if registration_id:
+        registration = run_sql("SELECT * from registration where id=%s", (registration_id,), with_dict=True)[0]
+        user_id = run_sql("Select id from user where email=%s", (registration['email'],), with_dict=True)
+
+        # check number of webapikeys
+        try:
+            webapikeys = run_sql("Select * from webapikey where id_user=%s", (user_id[0]['id'],), with_dict=True)
+        except:
+            webapikeys = []
+
+        if len(webapikeys) > 1:  # if more than one apikey than do not do anything just inform the user (very unlikely)
+            message += "There is more than one API key registered with: %s! Nothing was removed." % (registration['email'],)
+        elif len(webapikeys) == 0:
+            run_sql("DELETE from registration where id=%s", (registration_id,), with_dict=True)
+            message += "User data and API key associated with: %s were deleted." % (registration['email'],)
+        else:  # if one registration
+            run_sql("DELETE from webapikey where id_user=%s", (user_id[0]['id'],), with_dict=True)
+            run_sql("DELETE from user where id=%s", (user_id[0]['id'],), with_dict=True)
+            run_sql("DELETE from registration where id=%s", (registration_id,), with_dict=True)
+            message += "User data and API key associated with: %s were deleted." % (registration['email'],)
     else:
         message += "You need to specify registration ID."
 
