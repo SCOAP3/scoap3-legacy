@@ -166,9 +166,9 @@ def check_records(records, empty=False):
     fields = ['100', '700']
     filepath = "/opt/invenio/var/data/files/g0/"
     filepath2 = "/opt/invenio/var/data/files/g1/"
-    first_author = True
 
     for record in records:
+        first_author = True
         if is_elsevier(record):
             doc_ids = get_doc_ids(int(record.record_id))
             for doc_id in doc_ids:
