@@ -30,9 +30,9 @@ def find_nations(field, subfields):
                                    map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
             if not possible_affs:
                 possible_affs = []
-                for country in NATIONS_DEFAULT_MAP.itervalues():
+                for country in NATIONS_DEFAULT_MAP.iterkeys():
                     if country.lower() in x[1].lower().replace('\n', ' '):
-                        possible_affs.append(country)
+                        possible_affs.append(NATIONS_DEFAULT_MAP[country])
             if not possible_affs:
                 possible_affs = ['HUMAN CHECK']
             if 'CERN' in possible_affs and 'Switzerland' in possible_affs:
