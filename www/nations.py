@@ -449,3 +449,46 @@ def papers_by_country_csv(req, country):
                         inspire_record = 'http://inspirehep.net/record/%s' % (f[1],)
             print >> req, "%s;%s;%s;%s;%s;%s" % (count, title, authors, journal, doi, inspire_record)
             count += 1
+
+
+def countries_by_publishers(req):
+    req.content_type = "text/html"
+    print >> req, pageheaderonly("Countries/publishers", req=req)
+
+    journals = []
+    for pub in CFG_JOURNALS:
+        ids = perform_request_search(cc=pub)
+        journals.append((pub, ids))
+    journals.append(("older_than_2014", perform_request_search(cc='older_than_2014')))
+
+    countries = []
+    for country in sorted(set(NATIONS_DEFAULT_MAP.itervalues())):
+        ids = perform_request_search(p="country:%s" % (country,)) + perform_request_search(cc='older_than_2014', p="country:%s" % (country,))
+        countries.append((country, ids))
+
+    req.write("<h1>Number of articles per country per journal</h1>")
+    req.flush()
+    req.write("<table>\n")
+    req.write("<tr><th rowspan=2>Country</th><th colspan=10>Journals</th><th>Other</th></tr>")
+    req.write("""<tr>
+<td>Acta</td>
+<td>Advances in High Energy Physics</td>
+<td>Chinese Physics C</td>
+<td>European Physical Journal C</td>
+<td>Journal of Cosmology and Astroparticle Physics</td>
+<td>Journal of High Energy Physics</td>
+<td>New Journal of Physics</td>
+<td>Nuclear Physics B</td>
+<td>Physics Letters B</td>
+<td>Progress of Theoretical and Experimental Physics</td>
+<td>older_than_2014</td></tr>""")
+
+    for country, c_value in countries:
+        req.write("<tr><td>%s</td>" % (country,))
+        for journal, j_value in journals:
+            req.write("<td>%s</td>" % (len(set(c_value) & set(j_value)),))
+        req.write("</tr>")
+
+    req.write('</table>')
+    req.write(pagefooteronly(req=req))
+    return ""

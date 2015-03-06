@@ -44,6 +44,7 @@ def index(req):
     req.write("<a href='/nations.py/usa_papers_csv'>Selected US articles list CSV</a><br />")
     req.write("<a href='/nations.py/papers_by_country_csv?country=xxx'>CSV list of articles by country</a> - you need to change argument 'country=xxx' to a country from the list bellow<br />")
     req.write("<textarea>Algeria, Argentina, Armenia, Australia, Austria, Azerbaijan, Belarus, Belgium, Bangladesh, Brazil, Bulgaria, Canada, CERN, Chile, China, Colombia, Costa Rica, Cuba, Croatia, Cyprus, Czech Republic, Denmark, Egypt, Estonia, Finland, France, Georgia, Germany, Greece, Hong Kong, Hungary, Iceland, India, Indonesia, Iran, Ireland, Israel, Italy, Japan, South Korea, Lebanon, Lithuania, Luxembourg, Mexico, Montenegro, Morocco, Niger, Netherlands, New Zealand, Norway, Pakistan, Poland, Portugal, Romania, Republic of San Marino, Russia, Saudi Arabia, Serbia, Singapore, Slovakia, South Africa, Spain, Sweden, Switzerland, Taiwan, Thailand, Tunisia, Turkey, Ukraine, UK, USA, Uruguay, Uzbekistan, Venezuela, Vietnam, Yemen, Peru, Kuwait, Sri Lanka, Kazakhstan, Mongolia, United Arab Emirates, United Arab Emirates, Malaysia, Qatar, Kyrgyz Republic, Jordan</textarea>")
+    req.write("<a href='https://repo.scoap3.org/nations.py/countries_by_publishers'>Countries per journals</a>")
 
     req.write("<h2>Export to INSPIRE</h2>")
     req.write("<a href='/ffts_for_inspire.py'>Data export</a><br />")
