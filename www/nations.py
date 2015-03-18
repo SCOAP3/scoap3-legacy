@@ -29,6 +29,7 @@ from invenio.search_engine import (get_coll_i18nname,
 from invenio.bibrecord import record_get_field_value
 from invenio.dbquery import run_sql
 from invenio.utils import NATIONS_DEFAULT_MAP, multi_replace, get_doi
+from invenio.bibrecord import record_get_field_values, record_get_field_value
 
 import re
 
@@ -492,3 +493,44 @@ def countries_by_publishers(req):
     req.write('</table>')
     req.write(pagefooteronly(req=req))
     return ""
+
+
+def impact_articles(req, year):
+    try:
+        year = int(year)
+        assert 2014 <= year
+    except:
+        raise SERVER_RETURN(HTTP_BAD_REQUEST)
+
+    req.content_type = 'text/csv; charset=utf-8'
+    req.headers_out['content-disposition'] = ('attachment; '
+                                              'filename=impact_articles.csv')
+
+    ids = perform_request_search(p="datecreated:{year}-01-01->{year}-12-31".format(year=year))
+    counter = 0
+    print >> req, "#;recid;journal;author;orcid;affiliation;countries"
+    for i in ids:
+        counter += 1
+        try:
+            rec = get_record(i)
+        except:
+            print >> req, "{c},{recid},Can't load metadata".format(c=counter, recid=i)
+            continue
+        journal = record_get_field_value(rec, tag='773', code='p')
+        for field in ['100', '700']:
+            if field in rec:
+                for author in rec[field]:
+                    name = ""
+                    orcid = ""
+                    aff = ""
+                    country = ""
+                    for key, val in author[0]:
+                        if key is 'a':
+                            name = unicode(val, 'UTF-8').replace('\n', ' ').strip()
+                        if key is 'j':
+                            orcid = unicode(val, 'UTF-8').replace('\n', ' ').strip()
+                        if key in ['v', 'u']:
+                            aff += unicode(val, 'UTF-8').replace('\n', ' ').strip() + " | "
+                        if key is 'w':
+                            country += unicode(val, 'UTF-8').replace('\n', ' ').strip() + ";"
+                    print >> req, "{c};{recid};{journal};{name};{orcid};{aff};{country}".format(c=counter, recid=i, journal=journal, name=name, orcid=orcid, aff=aff, country=country)
