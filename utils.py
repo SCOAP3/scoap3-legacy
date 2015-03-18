@@ -160,6 +160,8 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Kingdom": "UK",
                        "UK": "UK",
                        "England": "UK",
+                       "Scotland": "UK",
+                       "Wales": "UK",
                        ##########USA########
                        "United States of America": "USA",
                        "United States": "USA",
