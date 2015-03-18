@@ -53,7 +53,7 @@ def _get_orcids(xml_doc):
         try:
             orcid = xml_author.getAttribute('orcid')
             if orcid:
-                result.append('ORCID:{0}'.format(orcid))
+                result.append(orcid)
             else:
                 result.append('')
         except IndexError:
@@ -86,6 +86,7 @@ def _add_orcid(record, author, field, i, orcid):
 
 
 def check_records(records, empty=False):
+    ## need to support different folders
     filepath = "/opt/invenio/var/data/files/g0/"
 
     for record in records:
@@ -113,4 +114,3 @@ def check_records(records, empty=False):
                     _add_orcid(record, author, '700', i, orcid)
             except KeyError:
                 pass
-
