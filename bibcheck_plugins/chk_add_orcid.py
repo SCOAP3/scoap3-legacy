@@ -19,8 +19,9 @@
 
 import re
 
+from os import listdir
+from os.path import join
 from xml.dom.minidom import parse
-
 from harvestingkit.minidom_utils import xml_to_text
 from invenio.utils import get_doc_ids, get_filenames_from_directory
 
@@ -85,15 +86,31 @@ def _add_orcid(record, author, field, i, orcid):
             record.add_subfield((field+'__j', i, 0), 'j', orcid)
 
 
+def get_file_path_by_doc_id(docid):
+    filepath = "/opt/invenio/var/data/files"
+    resolved_path = ""
+    for subdir in listdir(filepath):
+        if str(docid) in listdir(join(filepath, subdir)):
+            resolved_path = join(filepath, subdir, str(docid))
+
+    if resolved_path:
+        return resolved_path
+    else:
+        raise MissingDocFileFolderError("Missing folder for docid: {0}".format(docid))
+
+
+class MissingDocFileFolderError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
 def check_records(records, empty=False):
-    ## need to support different folders
-    filepath = "/opt/invenio/var/data/files/g0/"
 
     for record in records:
         doc_ids = get_doc_ids(int(record.record_id))
         for doc_id in doc_ids:
             try:
-                latest_file = get_latest_file(filepath + str(doc_id) + '/')
+                latest_file = get_latest_file(get_file_path_by_doc_id(doc_id))
                 xml = parse(latest_file)
             except:
                 # DEEPLY sorry for the next line...
@@ -102,6 +119,7 @@ def check_records(records, empty=False):
             orcids = _get_orcids(xml)
 
             try:
+                record.warn(zip(orcids[:1],record['100']))
                 for i, (orcid, author) in enumerate(zip(orcids[:1],
                                                         record['100'])):
                     _add_orcid(record, author, '100', i, orcid)
@@ -109,6 +127,7 @@ def check_records(records, empty=False):
                 pass
 
             try:
+                record.warn(zip(orcids[:1],record['700']))
                 for i, (orcid, author) in enumerate(zip(orcids[1:],
                                                         record['700'])):
                     _add_orcid(record, author, '700', i, orcid)
