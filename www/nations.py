@@ -156,7 +156,7 @@ CFG_SELECTED_AFF = {'Andrews University':
 
 
 def _build_query(nation):
-    return "100__w:'{0}' OR 700__w:'{0}'".format(nation)
+    return '100__w:"{0}" OR 700__w:"{0}"'.format(nation)
 
 
 def index(req):
