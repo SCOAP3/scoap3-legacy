@@ -53,14 +53,9 @@ def _get_orcids(xml_doc):
     for xml_author in xml_authors:
         try:
             orcid = xml_author.getAttribute('orcid')
-            if orcid:
-                result.append(orcid)
-            else:
-                result.append('')
+            result.append(orcid)
         except IndexError:
             result.append('')
-
-        return result
 
     xml_authors = xml_doc.getElementsByTagName("contrib")
     for xml_author in xml_authors:
@@ -81,6 +76,7 @@ def _add_orcid(record, author, field, i, orcid):
         orcid = 'ORCID:{0}'.format(orcid)
         if has_field(author, 'j'):
             j = _get_index(author, 'j')
+            record.warn("Amending field for orcid")
             record.amend_field((field+'__j', i, j), orcid)
         else:
             record.add_subfield((field+'__j', i, 0), 'j', orcid)
@@ -116,10 +112,8 @@ def check_records(records, empty=False):
                 # DEEPLY sorry for the next line...
                 continue
 
-            orcids = _get_orcids(xml)
-
+            orcids = _get_orcids(xml, record)
             try:
-                record.warn(zip(orcids[:1],record['100']))
                 for i, (orcid, author) in enumerate(zip(orcids[:1],
                                                         record['100'])):
                     _add_orcid(record, author, '100', i, orcid)
@@ -127,7 +121,6 @@ def check_records(records, empty=False):
                 pass
 
             try:
-                record.warn(zip(orcids[:1],record['700']))
                 for i, (orcid, author) in enumerate(zip(orcids[1:],
                                                         record['700'])):
                     _add_orcid(record, author, '700', i, orcid)

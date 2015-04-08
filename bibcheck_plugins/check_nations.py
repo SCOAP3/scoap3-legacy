@@ -25,7 +25,7 @@ def find_nations(field, subfields):
     result = []
     for x in field:
         if x[0] in subfields:
-            values = [y.replace('.', '').lower().strip() for y in re.findall(r"[\w']+", x[1].lower())]
+            values = [y.lower().strip() for y in re.findall(r"[\w']+", x[1].lower().replace('.', ''))]
             possible_affs = filter(lambda y: y is not None,
                                    map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
             if not possible_affs:
