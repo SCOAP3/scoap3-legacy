@@ -18,7 +18,7 @@
 ## 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 """
-Bibcheck plugin for hiding old FFTs.
+Hide old FFTs.
 """
 
 from invenio.bibdocfile import BibRecDocs, CFG_BIBDOCFILE_AVAILABLE_FLAGS
@@ -26,29 +26,20 @@ from invenio.search_engine import perform_request_search
 from invenio.bibtask import write_message
 
 
-def get_record_id(record):
-    position, value = record.iterfield('001___').next()
-    return int(value)
-
-
-def check_records(records):
-    for record in records:
-        one_id = get_record_id(record)
+def hide_old_ffts():
+    ids = perform_request_search(p="", of='intbitset')
+    for one_id in ids:
         bibrec = BibRecDocs(one_id)
-        try:
-            bibdoc = bibrec.list_bibdocs()[0]
-            latest_rev = bibdoc.get_latest_version()
+        bibdoc = bibrec.list_bibdocs()[0]
+        latest_rev = bibdoc.get_latest_version()
 
-            i = 1
-            while i < latest_rev:
-                rev_file_types = []
-                for f in bibdoc.list_version_files(i):
-                    if f.format not in rev_file_types:
-                        rev_file_types.append(f.format)
-                for file_type in rev_file_types:
-                    write_message("Record %s: hiding format %s in revision %s" % (one_id, file_type, i))
-                    bibdoc.set_flag(CFG_BIBDOCFILE_AVAILABLE_FLAGS[3], file_type, i)
-                i += 1
-        except Exception as e:
-            record.warn("Error when hiding previous files")
-            record.warn(e)
+        i = 1
+        while i < latest_rev:
+            rev_file_types = []
+            for f in bibdoc.list_version_files(i):
+                if f.format not in rev_file_types:
+                    rev_file_types.append(f.format)
+            for file_type in rev_file_types:
+                write_message("Record %s: hiding format %s in revision %s" % (one_id, file_type, i))
+                bibdoc.set_flag(CFG_BIBDOCFILE_AVAILABLE_FLAGS[3], file_type, i)
+            i += 1
