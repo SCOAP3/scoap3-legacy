@@ -112,7 +112,7 @@ def check_records(records, empty=False):
                 # DEEPLY sorry for the next line...
                 continue
 
-            orcids = _get_orcids(xml, record)
+            orcids = _get_orcids(xml)
             try:
                 for i, (orcid, author) in enumerate(zip(orcids[:1],
                                                         record['100'])):
