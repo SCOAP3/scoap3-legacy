@@ -86,7 +86,7 @@
       <dc:creator>
         <xsl:value-of select="subfield[@code='a']"/>
         <xsl:if test="subfield[@code='j']">
-          , <xsl:value-of select="subfield[@code='j']"/>
+          ; <xsl:value-of select="subfield[@code='j']"/>
         </xsl:if>
       </dc:creator>
     </xsl:for-each>
