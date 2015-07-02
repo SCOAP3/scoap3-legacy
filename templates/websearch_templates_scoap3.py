@@ -113,7 +113,7 @@ class Template(DefaultTemplate):
           - 'ln' *string* - The language to display
           - 'display_email_alert_part' *bool* - whether to display email alert part
         """
-        return ""
+        return DefaultTemplate.tmpl_alert_rss_teaser_box_for_query(self, id_query, ln, False)
 
     def tmpl_nbrecs_info(self, number, prolog=None, epilog=None, ln=CFG_SITE_LANG, none_yet_support=False):
         """

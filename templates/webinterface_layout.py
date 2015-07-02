@@ -351,7 +351,7 @@ class WebInterfaceInvenio(WebInterfaceSearchInterfacePages):
                    'oai2d', ('oai2d.py', 'oai2d'),
                    #('getfile.py', 'getfile'),
                    #'submit',
-                   #'rss',
+                   'rss',
                    'stats',
                    #'journal',
                    #'help',
