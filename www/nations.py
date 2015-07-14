@@ -26,10 +26,9 @@ from invenio.search_engine import perform_request_search
 from invenio.search_engine import (get_coll_i18nname,
                                    get_record,
                                    get_collection_reclist)
-from invenio.bibrecord import record_get_field_value
 from invenio.dbquery import run_sql
 from invenio.utils import NATIONS_DEFAULT_MAP, multi_replace, get_doi
-from invenio.bibrecord import record_get_field_values, record_get_field_value
+from invenio.bibrecord import record_get_field_values, record_get_field_value, field_get_subfield_values
 
 import re
 
@@ -449,6 +448,49 @@ def papers_by_country_csv(req, country):
                     if 'a' in f:
                         inspire_record = 'http://inspirehep.net/record/%s' % (f[1],)
             print >> req, "%s;%s;%s;%s;%s;%s" % (count, title, authors, journal, doi, inspire_record)
+            count += 1
+
+
+def papers_by_country_with_affs_csv(req, country):
+    req.content_type = 'text/csv; charset=utf-8'
+    req.headers_out['content-disposition'] = ('attachment; '
+                                              'filename=papers_by_country.csv')
+
+    ## print the list of linkt to the articles
+    count = 1
+    print >> req, country
+    search = "100__w:'%s' OR 700__w:'%s'" % (country, country)
+    res = perform_request_search(p='%s' % (search,))
+    print >> req, "#;Title;Journal;DOI;Inspire record;Author;Affiliations"
+    if len(res):
+        for rec_id in res:
+            author_count = 11
+            rec = get_record(rec_id)
+            title = ''
+            authors = ''
+            journal = ''
+            doi = ''
+            inspire_record = ''
+            if '245' in rec:
+                title = re.sub("<.*?>", "", rec['245'][0][0][0][1])
+            for sub in rec['773'][0][0]:
+                if 'p' in sub[0]:
+                    journal = sub[1]
+            doi = get_doi(rec_id)
+            if '035' in rec:
+                for f in rec['035'][0][0]:
+                    if 'a' in f:
+                        inspire_record = 'http://inspirehep.net/record/%s' % (f[1],)
+            print >> req, "%s;%s;%s;%s;%s;;" % (count, title, journal, doi, inspire_record)
+            if '100' in rec:
+                author = rec['100'][0][0][0][1]
+                affiliations = record_get_field_values(rec, tag='100', code='v')
+                print >> req, ";;;;;%s;%s" % (author, " | ".join(affiliations))
+            if '700' in rec:
+                for auth in rec['700']:
+                    author = auth[0][0][1]
+                    affiliations = field_get_subfield_values(auth, code='v') 
+                    print >> req, ";;;;;%s;%s" % (author, " | ".join(affiliations))
             count += 1
 
 
