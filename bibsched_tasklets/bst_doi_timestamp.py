@@ -69,3 +69,6 @@ def bst_doi_timestamp(reset=0):
                 run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
         except URLError as e:
             write_message("Problem with connection! %s" % (e,))
+        except TimeoutError as e:
+            write_message("Timeout error %s" % (e,))
+            write_message("Finishing and rescheduling")
