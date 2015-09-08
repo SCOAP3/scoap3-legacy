@@ -28,6 +28,7 @@ from invenio.bibtask import task_update_progress, write_message
 from invenio.crossrefutils import get_all_modified_dois
 from invenio.dbquery import run_sql
 from urllib2 import URLError
+import socket
 
 
 CFG_SCOAP3_DOIS = {
@@ -57,18 +58,26 @@ def bst_doi_timestamp(reset=0):
     if int(reset):
         last_run = (datetime(2014, 1, 1) - timedelta(days=4)).strftime("%Y-%m-%d")
     write_message("Retrieving DOIs modified since %s" % last_run)
-    for publisher, re_match in CFG_SCOAP3_DOIS.items():
-        task_update_progress("Retrieving DOIs for %s" % publisher)
-        write_message("Retriving DOIs for %s" % publisher)
-        try:
-            res = get_all_modified_dois(publisher, last_run, re_match, debug=True)
-            for doi in res:
-                if run_sql("SELECT doi FROM doi WHERE doi=%s", (doi, )):
-                    continue
-                write_message("New DOI discovered for publisher %s: %s" % (publisher, doi))
-                run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
-        except URLError as e:
-            write_message("Problem with connection! %s" % (e,))
-        except TimeoutError as e:
-            write_message("Timeout error %s" % (e,))
-            write_message("Finishing and rescheduling")
+    restart_on_error = True
+    while restart_on_error:
+        restart_on_error = False
+        for publisher, re_match in CFG_SCOAP3_DOIS.items():
+            task_update_progress("Retrieving DOIs for %s" % publisher)
+            write_message("Retriving DOIs for %s" % publisher)
+            try:
+                res = get_all_modified_dois(publisher, last_run, re_match, debug=True)
+                for doi in res:
+                    if run_sql("SELECT doi FROM doi WHERE doi=%s", (doi, )):
+                        continue
+                    write_message("New DOI discovered for publisher %s: %s" % (publisher, doi))
+                    run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
+            except URLError as e:
+                write_message("Problem with connection! %s" % (e,))
+                restart_on_error = True
+            except socket.timeout as e:
+                write_message("Timeout error %s" % (e,))
+                write_message("Finishing and rescheduling")
+                restart_on_error = True
+            except ValueError as e:
+                write_message("Value error in JSON string! %s" % (e,))
+                restart_on_error = True
