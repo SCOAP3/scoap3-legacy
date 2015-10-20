@@ -489,7 +489,7 @@ def papers_by_country_with_affs_csv(req, country):
             if '700' in rec:
                 for auth in rec['700']:
                     author = auth[0][0][1]
-                    affiliations = field_get_subfield_values(auth, code='v') 
+                    affiliations = field_get_subfield_values(auth, code='v')
                     print >> req, ";;;;;%s;%s" % (author, " | ".join(affiliations))
             count += 1
 
@@ -498,18 +498,21 @@ def countries_by_publishers(req):
     req.content_type = "text/html"
     print >> req, pageheaderonly("Countries/publishers", req=req)
 
-    journals = []
-    for pub in CFG_JOURNALS:
-        ids = perform_request_search(cc=pub)
-        journals.append((pub, ids))
-    journals.append(("older_than_2014", perform_request_search(cc='older_than_2014')))
+    ############
+    ## PART 1 ##
+    # journals = []
+    # for pub in CFG_JOURNALS:
+    #     ids = perform_request_search(cc=pub)
+    #     journals.append((pub, ids))
+    # journals.append(("older_than_2014", perform_request_search(cc='older_than_2014')))
 
-    countries = []
-    for country in sorted(set(NATIONS_DEFAULT_MAP.itervalues())):
-        ids = perform_request_search(p="country:%s" % (country,)) + perform_request_search(cc='older_than_2014', p="country:%s" % (country,))
-        countries.append((country, ids))
+    # countries = []
+    # for country in sorted(set(NATIONS_DEFAULT_MAP.itervalues())):
+    #     ids = perform_request_search(p="country:%s" % (country,)) + perform_request_search(cc='older_than_2014', p="country:%s" % (country,))
+    #     countries.append((country, ids))
 
     req.write("<h1>Number of articles per country per journal</h1>")
+    req.write("<h2>Minimum one author from the country</h2>")
     req.flush()
     req.write("<table>\n")
     req.write("<tr><th rowspan=2>Country</th><th colspan=10>Journals</th><th>Other</th></tr>")
@@ -526,10 +529,54 @@ def countries_by_publishers(req):
 <td>Progress of Theoretical and Experimental Physics</td>
 <td>older_than_2014</td></tr>""")
 
-    for country, c_value in countries:
+    for country in sorted(set(NATIONS_DEFAULT_MAP.itervalues())):
         req.write("<tr><td>%s</td>" % (country,))
-        for journal, j_value in journals:
-            req.write("<td>%s</td>" % (len(set(c_value) & set(j_value)),))
+        for pub in CFG_JOURNALS + ["older_than_2014"]:
+            req.write("<td>%s</td>" % perform_request_search(p="country:%s" % (country,), cc=pub))
+        req.write("</tr>")
+
+    req.write('</table>')
+
+    ############
+    ## PART 2 ##
+    # journals = []
+    hitcount = {}
+    for pub in CFG_JOURNALS + ["older_than_2014"]:
+        ids = perform_request_search(cc=pub)
+        hitcount[pub] = {}
+        for country in sorted(set(NATIONS_DEFAULT_MAP.itervalues())):
+            hitcount[pub][country] = 0
+
+        for id in ids:
+            record = get_record(id)
+            countries = set(record_get_field_values(record, '700', '%', '%', 'w') + record_get_field_values(record, '100', '%', '%', 'w'))
+            if len(countries) == 1:
+                c = countries.pop()
+                if c in set(NATIONS_DEFAULT_MAP.itervalues()):
+                    hitcount[pub][countries[0]] += 1
+
+    req.write("<h1>Number of articles per country per journal</h1>")
+    req.write("<h2>All author from the country</h2>")
+    req.flush()
+    req.write("<table>\n")
+    req.write("<tr><th rowspan=2>Country</th><th colspan=10>Journals</th><th>Other</th></tr>")
+    req.write("""<tr>
+<td>Acta</td>
+<td>Advances in High Energy Physics</td>
+<td>Chinese Physics C</td>
+<td>European Physical Journal C</td>
+<td>Journal of Cosmology and Astroparticle Physics</td>
+<td>Journal of High Energy Physics</td>
+<td>New Journal of Physics</td>
+<td>Nuclear Physics B</td>
+<td>Physics Letters B</td>
+<td>Progress of Theoretical and Experimental Physics</td>
+<td>older_than_2014</td></tr>""")
+
+    for country in sorted(set(NATIONS_DEFAULT_MAP.itervalues())):
+        req.write("<tr><td>%s</td>" % (country,))
+        for pub in CFG_JOURNALS + ["older_than_2014"]:
+            req.write("<td>%s</td>" % hitcount[pub][country])
         req.write("</tr>")
 
     req.write('</table>')
