@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from invenio.dbquery import run_sql
 from invenio.webpage import pagefooteronly, pageheaderonly
 from invenio.urlutils import redirect_to_url
@@ -6,6 +7,8 @@ from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
 from invenio.webuser import collect_user_info
 from invenio.web_api_key import create_new_web_api_key
 import json
+import re
+from dateutil.parser import parse
 
 
 def index(req):
@@ -950,6 +953,22 @@ def registration_admin(req, message=""):
 
     req.content_type = "text/html"
     req.write(pageheaderonly("Registration admin", req=req))
+    req.write(pageheaderonly("API active users", req=req))
+    req.write("""<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.css"">
+
+<!-- jQuery -->
+<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.js"></script>""")
+    req.write("""<script>
+$(document).ready( function () {
+    $('#registrations').DataTable({
+        paging: false
+    });
+} );
+</script>""")
 
     if message:
         req.write("<strong>%s</strong>" % (message,))
@@ -957,9 +976,10 @@ def registration_admin(req, message=""):
 
     regs = run_sql("SELECT * FROM registration", with_dict=True)
 
-    req.write("<table>")
-    req.write("<thead><tr><th>ID</th><th>Registration date</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Affiliated?</th><th>Desc.</th><th>Is accepted</th></tr>")
+    req.write("<table id='registrations' class='display compact'>")
+    req.write("<thead><tr><th>Registration date</th><th>Name</th><th>Email</th><th>Position</th><th>Country</th><th>Organisation</th><th>Affiliated?</th><th>Desc.</th><th>Is accepted</th></tr></thead>")
     count = 1
+    req.write("<tbody>")
     for reg in regs:
         try:
             int(reg['country'])
@@ -981,9 +1001,8 @@ def registration_admin(req, message=""):
                 key = "Error"
 
         req.write("<tr>")
-        req.write("<td>%(id)s</td><td>%(date)s</td><td>%(name)s</td><td>%(email)s</td><td>%(position)s</td><td>%(country)s</td><td>%(org)s</td><td>%(is_aff)s</td><td>%(desc)s</td>"
-                  % {'id': count,
-                     'date': reg['created'],
+        req.write("<td>%(date)s</td><td>%(name)s</td><td>%(email)s</td><td>%(position)s</td><td>%(country)s</td><td>%(org)s</td><td>%(is_aff)s</td><td>%(desc)s</td>"
+                  % {'date': reg['created'],
                      'name': reg['name'],
                      'email': reg['email'],
                      'position': reg['position'],
@@ -1004,9 +1023,101 @@ def registration_admin(req, message=""):
     return ""
 
 
+def usage_summary(req):
+    """Prints the summary of usage of API by searching for specific logs in
+    Apache log."""
+    user_info = collect_user_info(req)
+    if not acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
+        return redirect_to_url(req, "http://api.scoap3.org")
+
+    req.content_type = "text/html"
+    req.write(pageheaderonly("API active users", req=req))
+    req.write("""<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.css"">
+
+<!-- jQuery -->
+<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.js"></script>""")
+    req.write("""<script>
+$(document).ready( function () {
+    $('#api_usage').DataTable({
+        paging: false
+    });
+} );
+</script>""")
+    apache_log = open("/opt/invenio/var/log/apache.log", "r")
+    hits = {}
+    for line in apache_log:
+        found = re.search("apikey.*?&", line)
+        if found:
+            apikey = found.group().split('%')[0].replace("&", "").split("=")[-1]
+            if apikey in hits:
+                hits[apikey]["count"] += 1
+            else:
+                hits[apikey] = {}
+                hits[apikey]["count"] = 1
+            date = re.search("\[.*?\]", line)
+            ## adds last usage date
+            if date:
+                date = parse(date.group().strip('[]').replace(":", " ", 1))
+                if "last_usage" in hits[apikey]:
+                    if hits[apikey]["last_usage"] < date:
+                        hits[apikey]["last_usage"] = date
+                else:
+                    hits[apikey]["last_usage"] = date
+            ## adds country
+            user_data = _get_user_data(apikey)
+            try:
+                int(user_data["country"])
+                hits[apikey]["country"] = run_sql("Select name from country where id=%s", (user_data["country"],))[0][0]
+            except:
+                hits[apikey]["country"] = user_data["country"]
+            ## adds registrant
+            hits[apikey]["registrant"] = "{0} [{1}]".format(user_data["name"],user_data["organisation"])
+
+    req.write("<table id='api_usage' class='display compact'>")
+    req.write("""<thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Registrant</th>
+                        <th>API key</th>
+                        <th>Number of usages</th>
+                        <th>Last usage</th>
+                    </tr>
+                </thead>""")
+    req.write("<tbody>")
+    for user in hits.iterkeys():
+        req.write("<tr>")
+        req.write("""<td>{0}</td>
+                     <td>{1}</td>
+                     <td>{2}</td>
+                     <td>{3}</td>
+                     <td>{4}</td>""".format(hits[user]['country'],
+                                            hits[user]["registrant"],
+                                            user,
+                                            hits[user]["count"],
+                                            hits[user]["last_usage"]))
+        req.write("</tr>")
+    req.write("<tbody>")
+    req.write("</table>")
+    req.write(pagefooteronly(req=req))
+    return ""
+
+
 def _get_user_keys(user_id):
     latest_key = run_sql("SELECT id, secret FROM webapikey WHERE id_user=%s", (user_id,), with_dict=True)[-1]
     return latest_key
+
+
+def _get_user_data(apikey):
+    try:
+        invenio_user_id = run_sql("SELECT id_user FROM webapikey WHERE id=%s", (apikey,), with_dict=True)[-1]['id_user']
+        email = run_sql("Select email from user where id=%s", (invenio_user_id,), with_dict=True)[0]['email']
+        return run_sql("SELECT name, country, organisation FROM registration WHERE email=%s", (email,), with_dict=True)[0]
+    except:
+        return {"name":"unknown","country":"unknown","organisation":"unknown"}
 
 
 def accept_registration(req, registration_id):
