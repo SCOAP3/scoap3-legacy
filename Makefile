@@ -17,7 +17,7 @@ bibcheck_plugins = bibcheck_plugins/*
 bibexport_config = sitemap.cfg
 bibformat_elements = bfe_publi_info.py
 bibformat_templates = Default_HTML_actions.bft Default_HTML_detailed.bft Default_HTML_brief.bft
-www_scripts = www/nations.py www/ffts_for_inspire.py www/compliance.py www/tools.py
+www_scripts = www/*
 
 elsevier_data_files = $(PREFIX)/var/data/scoap3/elsevier
 elsevier_ready_packages = $(PREFIX)/var/data/scoap3/elsevier/ready_pkgs
