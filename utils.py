@@ -61,6 +61,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Cuba": "Cuba",
                        "Croatia": "Croatia",
                        "Cyprus": "Cyprus",
+                       "Northern Cyprus": "Turkey",
                        #######################
                        "Czech Republic": "Czech Republic",
                        "Czech": "Czech Republic",
