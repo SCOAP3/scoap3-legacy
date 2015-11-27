@@ -19,20 +19,25 @@
 
 from invenio.utils import NATIONS_DEFAULT_MAP
 import re
+from invenio.bibrecord import record_delete_subfield
 
 
-def find_nations(field, subfields):
+def find_nations(field, subfields, record):
     result = []
     for x in field:
         if x[0] in subfields:
-            values = [y.lower().strip() for y in re.findall(r"[\w']+", x[1].lower().replace('.', ''))]
-            possible_affs = filter(lambda y: y is not None,
-                                   map(dict((key.lower(), val) for (key, val) in NATIONS_DEFAULT_MAP.iteritems()).get, values))
-            if not possible_affs:
-                possible_affs = []
-                for country in NATIONS_DEFAULT_MAP.iterkeys():
-                    if country.lower() in x[1].lower().replace('\n', ' '):
-                        possible_affs.append(NATIONS_DEFAULT_MAP[country])
+            possible_affs = []
+            def _sublistExists(list1, list2):
+                return ''.join(map(str, list2)) in ''.join(map(str, list1))
+            values = set([y.lower().strip() for y in re.findall(ur"[\w']+", unicode(x[1]).decode("UTF-8"), re.UNICODE)])
+            record.warn(values)
+            for key, val in NATIONS_DEFAULT_MAP.iteritems():
+                key = unicode(key)
+                key_parts = set(key.lower().split())
+                if key_parts.issubset(values):
+                    possible_affs.append(val)
+                    values = values.difference(key_parts)
+            record.warn("%s %s" % (possible_affs, x[1]))
             if not possible_affs:
                 possible_affs = ['HUMAN CHECK']
             if 'CERN' in possible_affs and 'Switzerland' in possible_affs:
@@ -45,7 +50,6 @@ def find_nations(field, subfields):
     result = sorted(list(set(result)))
 
     return result
-
 
 
 def get_current_countries(field):
@@ -63,18 +67,15 @@ def check_records(records, empty=False):
 
     for record in records:
         for field in fields:
+            for pos, val in record.iterfield(field+"__w"):
+                record.warn("%s %s" % (pos, val))
+                record_delete_subfield(record, field, "w")
+                record.set_amended('Removing old countries')
             if field in record:
                 for i, x in enumerate(record[field]):
-                    new_countries = find_nations(x[0], ['u', 'v'])
+                    new_countries = find_nations(x[0], ['u', 'v'], record)
                     current_countries = get_current_countries(x[0])
 
                     if new_countries is not current_countries:
-                        ## FIXME
-                        for key, val in enumerate(x[0]):
-                            if "w" in val:
-                                del x[0][key]
-                                record.set_amended('Adding new countries')
-                        # for position, value in record.iterfield(field + '__w'):
-                        #     record.delete_field(position)
-                        for val in new_countries:
+                        for val in set(new_countries):
                             record.add_subfield((field + '__w', i, 0), 'w', val)
