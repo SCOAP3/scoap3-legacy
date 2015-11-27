@@ -25,7 +25,8 @@ from invenio.webpage import pagefooteronly, pageheaderonly, page
 from invenio.search_engine import perform_request_search
 from invenio.search_engine import (get_coll_i18nname,
                                    get_record,
-                                   get_collection_reclist)
+                                   get_collection_reclist,
+                                   get_creation_date)
 from invenio.dbquery import run_sql
 from invenio.utils import NATIONS_DEFAULT_MAP, multi_replace, get_doi
 from invenio.bibrecord import record_get_field_values, record_get_field_value, field_get_subfield_values
@@ -623,3 +624,54 @@ def impact_articles(req, year):
                         if key is 'w':
                             country += unicode(val, 'UTF-8').replace('\n', ' ').strip() + ";"
                     print >> req, "{c};{recid};{journal};{name};{orcid};{aff};{country}".format(c=counter, recid=i, journal=journal, name=name, orcid=orcid, aff=aff, country=country)
+
+
+def national_authors_list(req, search_country):
+    req.content_type = 'text/csv; charset=utf-8'
+    req.headers_out['content-disposition'] = ('attachment; '
+                                              'filename=national_authors_list.csv')
+    ids = perform_request_search(p="country:'%s'" % (search_country,))
+    req.write("#;RECID;Title;Creation date;Publisher;Total # of authors;Authors name(given country only);Authors country;Authors affiliations\n")
+
+    for number, recid in enumerate(ids):
+        title = record_get_field_value(get_record(recid), '245', code="a")
+        del_date = get_creation_date(recid)
+        publisher = record_get_field_value(get_record(recid), '980', code="b")
+        rec = get_record(recid)
+
+        authors = []
+        author_count = 0
+        for f in ['100', '700']:
+            if f in rec:
+                for auth in rec[f]:
+                    author_count += 1
+                    aff = ''
+                    name = ''
+                    country = ''
+                    hit = 0
+                    for subfield, value in auth[0]:
+                        if subfield == 'a':
+                            name = value
+                        if subfield in ['v', 'u']:
+                            if aff:
+                                aff += ', ' + value
+                            else:
+                                aff = value
+                        if subfield == 'w':
+                            if country:
+                                country += ', ' + value
+                            else:
+                                country = value
+                            if search_country in value:
+                                hit = 1
+
+                    if hit:
+                        authors.append({'name': name,
+                                        'affiliation': aff.replace('\n',''),
+                                        'country': country})
+
+        for i, author in enumerate(authors):
+            if i == 0:
+                req.write("%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (number+1, recid, title.replace('\n',''), del_date, publisher, author_count, author['name'], author['country'], author['affiliation']))
+            else:
+                req.write(";;;;;;%s;%s;%s\n" % (author['name'], author['country'], author['affiliation']))
