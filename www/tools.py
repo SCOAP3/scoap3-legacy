@@ -20,6 +20,10 @@
 from invenio.webpage import pageheaderonly, pagefooteronly
 from invenio.access_control_admin import acc_is_user_in_role, acc_get_role_id
 from invenio.webuser import collect_user_info, page_not_authorized
+from invenio.dbquery import run_sql
+from invenio.bibrecord import record_get_field_values
+from invenio.search_engine import (perform_request_search,
+                                   get_record)
 
 
 def index(req):
@@ -61,6 +65,53 @@ def index(req):
     req.write("<a href='/collection/Editorial'>Editorials</a><br />")
     req.write("<a href='/collection/older_than_2014'>Articles older than 2014</a><br />")
     req.flush()
+
+    req.write(pagefooteronly(req=req))
+    return ""
+
+
+def show_restricted_records(req):
+    user_info = collect_user_info(req)
+    if not acc_is_user_in_role(user_info, acc_get_role_id("SCOAP3")):
+        return page_not_authorized(req=req)
+
+    all_ids = [id[0] for id in run_sql("Select id from bibrec")]
+    visible_ids = perform_request_search()
+
+    deleted_and_older_and_restricted = set(all_ids) - set(visible_ids)
+    restricted_ids = []
+    # restricted_ids_older = []
+    for id in deleted_and_older_and_restricted:
+        rec = get_record(id)
+        collections = record_get_field_values(rec, "980","%","%","%")
+        if "DELETED" not in collections:
+            year = record_get_field_values(rec, "773","%","%","y")
+            title = record_get_field_values(rec, "245","%","%","a")
+            if title:
+                title = title[0]
+            else:
+                title = "No title"
+            if year:
+                if int(year[0]) >= 2015:
+                    restricted_ids.append((id, title))
+                # else:
+                #    restricted_ids_older.append(id)
+            else:
+                restricted_ids.append((id,title))
+
+    print "Restricted ids"
+    print restricted_ids
+
+    req.content_type = "text/html"
+    req.write(pageheaderonly("Repository tools", req=req))
+    req.write("<h1>Restricted records</h1>")
+    req.write("<strong>Total number of possibli restricted records: {0}</strong>".format(len(restricted_ids)))
+    req.write("<ol>")
+    for id, title in restricted_ids:
+        req.write("<li><a href='http://repo.scoap3.org/record/{1}'>{0}</a> <a href='http://repo.scoap3.org/record/edit/?ln=en#state=edit&recid={1}'>edit</a></li>".format(title, id))
+    req.write("</ol>")
+    # for id, title in restricted_ids:
+    #    req.write("{0},".format(id))
 
     req.write(pagefooteronly(req=req))
     return ""
