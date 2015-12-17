@@ -29,11 +29,11 @@ def find_nations(field, subfields, record):
             possible_affs = []
             def _sublistExists(list1, list2):
                 return ''.join(map(str, list2)) in ''.join(map(str, list1))
-            values = set([y.lower().strip() for y in re.findall(ur"[\w']+", unicode(x[1]).decode("UTF-8"), re.UNICODE)])
+            values = set([y.lower().strip() for y in re.findall(ur"[\w']+", x[1].replace('.','').decode("UTF-8"), re.UNICODE)])
             record.warn(values)
             for key, val in NATIONS_DEFAULT_MAP.iteritems():
                 key = unicode(key)
-                key_parts = set(key.lower().split())
+                key_parts = set(key.lower().decode('utf-8').split())
                 if key_parts.issubset(values):
                     possible_affs.append(val)
                     values = values.difference(key_parts)
