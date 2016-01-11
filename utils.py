@@ -177,6 +177,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "United States": "USA",
                        "USA": "USA",
                        "America": "USA",
+                       "United Sates": "USA",
                        #######################
                        "Uruguay": "Uruguay",
                        "Uzbekistan": "Uzbekistan",
