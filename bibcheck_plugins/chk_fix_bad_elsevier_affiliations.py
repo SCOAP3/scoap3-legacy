@@ -164,18 +164,29 @@ def delete_fields(record, fields):
 
 def check_records(records, empty=False):
     fields = ['100', '700']
-    filepath = "/opt/invenio/var/data/files/g0/"
-    filepath2 = "/opt/invenio/var/data/files/g1/"
+    #filepath = "/opt/invenio/var/data/files/g0/"
+    #filepath2 = "/opt/invenio/var/data/files/g1/"
+    filepath = '/opt/invenio/var/data/files/'
+    filepaths = os.listdir(filepath)
 
     for record in records:
         first_author = True
         if is_elsevier(record):
             doc_ids = get_doc_ids(int(record.record_id))
             for doc_id in doc_ids:
-                try:
-                    latest_file = get_latest_file(filepath + str(doc_id) + '/')
-                except:
-                    latest_file = get_latest_file(filepath2 + str(doc_id) + '/')
+                # try:
+                #     latest_file = get_latest_file(filepath + str(doc_id) + '/')
+                # except:
+                #     latest_file = get_latest_file(filepath2 + str(doc_id) + '/')
+                latest_file = None
+                for folder in filepaths:
+                    try:
+                        latest_file = get_latest_file(filepath + '/' + folder + '/'  + str(doc_id) + '/')
+                        if latest_file:
+                           break
+                    except:
+                        print "No folder with name %s in %s directory" % (doc_id, folder)
+
                 try:
                     xml = parse(latest_file)
                 except:
