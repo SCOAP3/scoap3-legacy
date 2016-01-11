@@ -49,6 +49,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        ##########CERN########
                        "CERN": "CERN",
                        "Cern": "CERN",
+                       "European Organization for Nuclear Research": "CERN",
                        #######################
                        "Chile": "Chile",
                        ##########CHINA########
