@@ -206,7 +206,15 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        "Malaysia": "Malaysia",
                        "Qatar": "Qatar",
                        "Kyrgyz Republic": "Kyrgyz Republic",
-                       "Jordan": "Jordan"}
+                       "Jordan": "Jordan",
+                       #######################
+                       #######################
+                       ## cities #############
+                       'Belgrade': 'Serbia',
+                       'Istanbul': 'Turkey',
+                       'Ankara': 'Turkey',
+                       'Rome': 'Italy'}
+}
 
 
 #SCOAP3 related
