@@ -154,6 +154,7 @@ NATIONS_DEFAULT_MAP = {"Algeria": "Algeria",
                        ##############################
                        "España": "Spain",
                        "Spain": "Spain",
+                       "Sudan": "Sudan",
                        "Sweden": "Sweden",
                        "Switzerland": "Switzerland",
                        "Syria": "Syria",
