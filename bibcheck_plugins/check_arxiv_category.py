@@ -107,6 +107,7 @@ def check_records(records, empty=False):
 
         if arxiv_id:
             categories = _get_arxiv_category(arxiv_id)
+            sleep(2)
             if categories:
                 val = string.format(int(any(filter(lambda x: 'hep' in x,
                                                    categories))))
