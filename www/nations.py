@@ -675,3 +675,88 @@ def national_authors_list(req, search_country):
                 req.write("%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (number+1, recid, title.replace('\n',''), del_date, publisher, author_count, author['name'], author['country'], author['affiliation']))
             else:
                 req.write(";;;;;;%s;%s;%s\n" % (author['name'], author['country'], author['affiliation']))
+                
+def institutions_list(req, country):
+    from copy import deepcopy
+    def find_nations(affiliation):
+        NATIONS_DEFAULT_MAP['European Organization for Nuclear Research'] = 'CERN'
+        NATIONS_DEFAULT_MAP['Centre Europeen de Recherches Nucleaires'] = 'CERN'
+        NATIONS_DEFAULT_MAP['High Energy Accelerator Research Organization'] = 'KEK'
+        NATIONS_DEFAULT_MAP['KEK'] = 'KEK'
+        NATIONS_DEFAULT_MAP['FNAL'] = 'FNAL'
+        NATIONS_DEFAULT_MAP['Fermilab'] = 'FNAL'
+        NATIONS_DEFAULT_MAP['Fermi'] = 'FNAL'
+        NATIONS_DEFAULT_MAP['SLAC'] = 'SLAC'
+        NATIONS_DEFAULT_MAP['DESY'] = 'DESY'
+        NATIONS_DEFAULT_MAP['Deutsches Elektronen-Synchrotron'] = 'DESY'
+        NATIONS_DEFAULT_MAP['JINR'] = 'JINR'
+        NATIONS_DEFAULT_MAP['JOINT INSTITUTE FOR NUCLEAR RESEARCH'] = 'JINR'
+
+        possible_affs = []
+        def _sublistExists(list1, list2):
+            return ''.join(map(str, list2)) in ''.join(map(str, list1))
+        values = set([y.lower().strip() for y in re.findall(ur"[\w']+", affiliation.replace('.','').decode("UTF-8"), re.UNICODE)])
+
+        for key, val in NATIONS_DEFAULT_MAP.iteritems():
+            key = unicode(key)
+            key_parts = set(key.lower().decode('utf-8').split())
+            if key_parts.issubset(values):
+                possible_affs.append(val)
+                values = values.difference(key_parts)
+
+        if not possible_affs:
+            possible_affs = ['HUMAN CHECK']
+        if 'CERN' in possible_affs and 'Switzerland' in possible_affs:
+            # Don't use remove in case of multiple Switzerlands
+            possible_affs = [x for x in possible_affs if x != 'Switzerland']
+        if 'KEK' in possible_affs and 'Japan' in possible_affs:
+            possible_affs = [x for x in possible_affs if x != 'Japan']
+        if 'FNAL' in possible_affs and 'USA' in possible_affs:
+            possible_affs = [x for x in possible_affs if x != 'USA']
+        if 'SLAC' in possible_affs and 'USA' in possible_affs:
+            possible_affs = [x for x in possible_affs if x != 'USA']
+        if 'DESY' in possible_affs and 'Germany' in possible_affs:
+            possible_affs = [x for x in possible_affs if x != 'Germany']
+        if 'JINR' in possible_affs and 'Russia' in possible_affs:
+            possible_affs = [x for x in possible_affs if x != 'Russia']
+        return sorted(list(set(possible_affs)))[0]
+        
+    publisher_dict = {'New J. Phys.':0,
+                      'Acta Physica Polonica B':0,
+                      'Advances in High Energy Physics':0,
+                      'Chinese Phys. C':0,
+                      'EPJC':0,
+                      'JCAP':0,
+                      'JHEP':0,
+                      'Nuclear Physics B':0,
+                      'Physics letters B':0,
+                      'PTEP':0}
+
+    recids = perform_request_search(p='country:"%s"' % (country,))
+
+    req.content_type = 'text/csv; charset=utf-8'
+    req.headers_out['content-disposition'] = ('attachment; '
+                                              'filename=%s_institutions_list.csv' % (country,))
+
+    req.write("recid|authors #|title|country|New J. Phys.|Acta Physica Polonica B|Advances in High Energy Physics|Chinese Phys. C|EPJC|JCAP|JHEP|Nuclear Physics B|Physics letters B|PTEP\n")
+
+    for recid in recids:
+            rec = get_record(recid)
+            global_affs = {}
+            author_count = 0
+            if '100' in rec:
+                    author_count += len(rec['100'])
+            if '700' in rec:
+                    author_count += len(rec['700'])
+
+            journal = record_get_field_value(rec, '773', ind1="%", ind2="%", code='p')
+            affs = []
+            affs.extend(record_get_field_values(rec, '100', ind1="%", ind2="%", code='v'))
+            affs.extend(record_get_field_values(rec, '700', ind1="%", ind2="%", code='v'))
+            for aff in affs:
+                    if aff not in global_affs:
+                            global_affs[aff] = deepcopy(publisher_dict)
+                    global_affs[aff][journal] += 1
+
+            for aff, j in global_affs.iteritems():
+                req.write("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n" % (recid, author_count, aff.replace('\n', ' ').replace('\r', ''), find_nations(aff), j['New J. Phys.'],j['Acta Physica Polonica B'],j['Advances in High Energy Physics'],j['Chinese Phys. C'],j['EPJC'],j['JCAP'],j['JHEP'],j['Nuclear Physics B'],j['Physics letters B'],j['PTEP']))
