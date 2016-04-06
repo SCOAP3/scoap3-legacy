@@ -115,3 +115,44 @@ def show_restricted_records(req):
 
     req.write(pagefooteronly(req=req))
     return ""
+    
+def package_arrival(req, doi=None, package_name=None):
+    req.content_type = "text/html"
+    req.write(pageheaderonly("Repository tools - packages arrival", req=req))
+    req.write("<h1>Packages Arrivals</h1>")
+    req.write("""<form action='/tools.py/package_arrival' method='get'>
+                       <label for='doi'>DOI: </label>
+                       <input type='text' name='doi' value='{0}'>
+                       <label for='package_name'>Package Name: </label>
+                       <input type='text' name='package_name' value='{1}'>
+                       <input type='submit'>
+                     </form>""".format(doi, package_name))
+    if doi:
+        req.write("<h1>Results for doi: {0}</h1>".format(doi))
+        req.write("""<table>
+                       <thead>
+                         <th>#</th>
+                         <th>Package name</th>
+                         <th>Date</th>
+                       </thead>""")
+        packages = run_sql("select package.name as name, package.delivery_date as date from doi_package join package on doi_package.package_id = package.id WHERE doi_package.doi=%s", (doi,))
+        #req.write(str(packages))
+
+    if package_name:
+        req.write("<h1>Results for package: {0}</h1>".format(package_name))
+        req.write("""<table>
+                       <thead>
+                         <th>#</th>
+                         <th>Package name</th>
+                         <th>Date</th>
+                       </thead>""")
+        packages = run_sql("select package.name as name, package.delivery_date as date from package WHERE package.name like '%{0}%'".format(package_name))
+        #req.write(str(packages))
+
+    if packages:
+        for i, package in enumerate(packages):
+           req.write("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>".format(i+1, package[0], package[1]))
+        req.write("</table>")
+
+    req.write(pagefooteronly(req=req))
+    return ""
