@@ -39,7 +39,6 @@ def get_pdf(recid):
     return None, None, None
 
 def get_list():
-    papers = []
     prev_version = perform_request_search()
 
     for recid in prev_version:
@@ -66,8 +65,7 @@ def get_list():
                     if 'a' in t:
                         arxiv_id = t[1]
 
-        papers.append((recid, arxiv_id, get_creation_date(recid), checksum, url, url_type, doi))
-    return papers
+        yield (recid, arxiv_id, get_creation_date(recid), checksum, url, url_type, doi)
 
 
 def index(req):
@@ -78,7 +76,7 @@ def index(req):
     req.write("<table>\n")
 
     papers = get_list()
-    for i, paper_tuple in enumerate(papers):
+    for i, paper_tuple in enumerate(get_list()):
         req.write("""<tr><td>%i</td><td>%i</td><td>%s</td><td>%s</td><td>%s</td>""" % (i, paper_tuple[0], paper_tuple[1], paper_tuple[2], paper_tuple[3]))
         if paper_tuple[3]:
             req.write("""<td><a href='%s'>link</a></td>""" % (paper_tuple[4], ))
@@ -97,7 +95,7 @@ def csv(req):
     req.headers_out['content-disposition'] = 'attachment; filename=scoap3.csv'
     header = ','.join(('recid', 'arxiv_id', 'cr_date', 'checksum', 'link', 'type', 'doi'))
     print >> req, header
-    papers = get_list()
-    for paper_tuple in papers:
+    for paper_tuple in get_list():
         line = '%i, %s, %s, %s, %s, %s, %s' % paper_tuple
         print >> req, line
+    return ""
