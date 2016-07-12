@@ -38,10 +38,10 @@ def check_records(records):
                 continue
             xml2 = xml.dom.minidom.parseString(xml_file.read())
             subject = get_value_in_tag(xml2, "subject")
-            if subject in ["Editorial", "Erratum", "Corrigendum", "Addendum"]:
+            if subject in ["Editorial", "Erratum", "Corrigendum", "Addendum","Letter to the Editor"]:
                 field = record_get_field_value(record, '980', code='c')
                 if field:
-                    if field in ['ERRATUM', 'ADDENDUM', 'EDITORIAL','CORRIGENDUM']:
+                    if field in ['ERRATUM', 'ADDENDUM', 'EDITORIAL','CORRIGENDUM', 'LETTER TO THE EDITOR']:
                         for position, value in record.iterfield('980__c'):
                             record.amend_field(position, subject.upper())
                             break
@@ -55,3 +55,4 @@ def check_records(records):
                         break
             elif subject not in ["Review Article","Research Article","Retraction"]:
                 raise Exception("This subject: %s does not exit in SCOAP3 system" % (subject,))
+
