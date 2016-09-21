@@ -156,3 +156,19 @@ def package_arrival(req, doi=None, package_name=None):
 
     req.write(pagefooteronly(req=req))
     return ""
+    
+  def get_collections_count(req, callback=''):
+    a = {'Acta':0,
+         'Advances in High Energy Physics':0,
+         'Chinese Physics C':0,
+         'European Physical Journal C':0,
+         'Journal of Cosmology and Astroparticle Physics':0,
+         'Journal of High Energy Physics':0,
+         'New Journal of Physics':0,
+         'Nuclear Physics B':0,
+         'Physics Letters B':0,
+         'Progress of Theoretical and Experimental Physics':0
+    }
+    for key in a:
+        a[key] = len(perform_request_search(c=key))
+    return '%s(%s)' % (callback, json.dumps(a))
