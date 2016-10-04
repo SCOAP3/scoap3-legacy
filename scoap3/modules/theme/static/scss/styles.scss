@@ -41,6 +41,70 @@ $fa-font-path: "/static/node_modules/font-awesome/fonts";
 // @import "pages";
 // @import "dashboard";
 // @import "submission";
-@import "_home";
+// @import "_home";
 // @import "errors";
 // @import "cookies";
+
+// Homepage
+$violet: #7b5380;
+$light-gray: #f8f8f8;
+$dark-gray: #777;
+$font: 'PT Sans Narrow', sans-serif;
+
+html{
+    position: relative;
+    min-height: 100%;
+}
+
+
+html, body, .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6, p{
+    font-family: $font;
+}
+
+body{
+    margin-bottom: 240px;
+}
+
+footer{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 240px;
+    background-color: #f8f8f8;
+    padding:20px 0;
+    margin-top:20px;
+
+    h3 {
+        font-size: 1.5em;
+    }
+
+    .footer-below{
+        margin-top: 20px;
+    }
+}
+
+.scoap3-jumbotron-img{
+    background: url('https://scoap3.org/wp-content/uploads/2016/01/Slider3.jpeg') no-repeat;
+    padding-top: 2em;
+    padding-bottom: 2em;
+    background-size: cover;
+    background-position: center;
+    height:15em;
+    margin-bottom: 0;
+}
+
+.scoap3-jumbotron-heading{
+    background: $violet;
+
+}
+
+.frontpage{
+    margin-bottom: 0;
+}
+
+.collections-list{
+    .badge{
+        background-color: $light-gray;
+        color: $dark-gray;
+    }
+}
