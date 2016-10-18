@@ -24,6 +24,8 @@ from invenio.dbquery import run_sql
 from invenio.bibrecord import record_get_field_values
 from invenio.search_engine import (perform_request_search,
                                    get_record)
+from datetime import datetime
+import json
 
 
 def index(req):
@@ -115,7 +117,7 @@ def show_restricted_records(req):
 
     req.write(pagefooteronly(req=req))
     return ""
-    
+
 def package_arrival(req, doi=None, package_name=None):
     req.content_type = "text/html"
     req.write(pageheaderonly("Repository tools - packages arrival", req=req))
@@ -156,8 +158,9 @@ def package_arrival(req, doi=None, package_name=None):
 
     req.write(pagefooteronly(req=req))
     return ""
-    
-  def get_collections_count(req, callback=''):
+
+
+def get_collections_count(req, callback=''):
     a = {'Acta':0,
          'Advances in High Energy Physics':0,
          'Chinese Physics C':0,
@@ -168,7 +171,10 @@ def package_arrival(req, doi=None, package_name=None):
          'Nuclear Physics B':0,
          'Physics Letters B':0,
          'Progress of Theoretical and Experimental Physics':0
-    }
+         }
     for key in a:
         a[key] = len(perform_request_search(c=key))
+    a['all'] = len(perform_request_search())
+    a['this_year'] = len(perform_request_search(p="year:{}".format(datetime.date.today().year)))
+    a['today'] = len(perform_request_search(p="datecreated:{}".format(datetime.date.today())))
     return '%s(%s)' % (callback, json.dumps(a))
