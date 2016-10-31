@@ -24,7 +24,7 @@ from invenio.dbquery import run_sql
 from invenio.bibrecord import record_get_field_values
 from invenio.search_engine import (perform_request_search,
                                    get_record)
-from datetime import datetime
+import datetime
 import json
 
 
@@ -161,20 +161,22 @@ def package_arrival(req, doi=None, package_name=None):
 
 
 def get_collections_count(req, callback=''):
-    a = {'Acta':0,
-         'Advances in High Energy Physics':0,
-         'Chinese Physics C':0,
-         'European Physical Journal C':0,
-         'Journal of Cosmology and Astroparticle Physics':0,
-         'Journal of High Energy Physics':0,
-         'New Journal of Physics':0,
-         'Nuclear Physics B':0,
-         'Physics Letters B':0,
-         'Progress of Theoretical and Experimental Physics':0
+    a = {'journals': {'Acta':0,
+                      'Advances in High Energy Physics':0,
+                      'Chinese Physics C':0,
+                      'European Physical Journal C':0,
+                      'Journal of Cosmology and Astroparticle Physics':0,
+                      'Journal of High Energy Physics':0,
+                      'New Journal of Physics':0,
+                      'Nuclear Physics B':0,
+                      'Physics Letters B':0,
+                      'Progress of Theoretical and Experimental Physics':0
+                      },
+         'other':{}
          }
-    for key in a:
-        a[key] = len(perform_request_search(c=key))
-    a['all'] = len(perform_request_search())
-    a['this_year'] = len(perform_request_search(p="year:{}".format(datetime.date.today().year)))
-    a['today'] = len(perform_request_search(p="datecreated:{}".format(datetime.date.today())))
+    for key in a['journals']:
+        a['journals'][key] = len(perform_request_search(c=key))
+    a['other']['all'] = len(perform_request_search())
+    a['other']['this_year'] = len(perform_request_search(p="year:%s" % (datetime.date.today().year,)))
+    a['other']['today'] = len(perform_request_search(p="datecreated:%s" % (datetime.date.today(),)))
     return '%s(%s)' % (callback, json.dumps(a))
