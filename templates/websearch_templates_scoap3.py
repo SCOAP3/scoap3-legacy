@@ -21,7 +21,7 @@ WebSearch templates for SCOAP3
 import cgi
 
 from invenio.config import CFG_SITE_LANG, CFG_BASE_URL, CFG_SITE_NAME, CFG_SITE_NAME_INTL, CFG_WEBSEARCH_ADVANCEDSEARCH_PATTERN_BOX_WIDTH, \
-    CFG_WEBSEARCH_ENABLED_SEARCH_INTERFACES, CFG_WEBSEARCH_LIGHTSEARCH_PATTERN_BOX_WIDTH, CFG_WEBSEARCH_MAX_RECORDS_IN_GROUPS, \
+    CFG_WEBSEARCH_LIGHTSEARCH_PATTERN_BOX_WIDTH, CFG_WEBSEARCH_MAX_RECORDS_IN_GROUPS, \
     CFG_WEBSEARCH_SIMPLESEARCH_PATTERN_BOX_WIDTH, CFG_WEBSEARCH_SPLIT_BY_COLLECTION, CFG_SITE_URL, CFG_SITE_RECORD
 from invenio.urlutils import drop_default_urlargd, create_html_link
 from invenio.messages import gettext_set_language
@@ -367,7 +367,7 @@ class Template(DefaultTemplate):
               'advanced_search': create_html_link(self.build_search_url(p1=p,
                                                                         f1=f,
                                                                         rm=rm,
-                                                                        aas=max(CFG_WEBSEARCH_ENABLED_SEARCH_INTERFACES),
+                                                                        aas=1,
                                                                         cc=cc,
                                                                         jrec=jrec,
                                                                         ln=ln,
@@ -425,7 +425,7 @@ class Template(DefaultTemplate):
               'advanced_search': create_html_link(self.build_search_url(p1=p,
                                                                         f1=f,
                                                                         rm=rm,
-                                                                        aas=max(CFG_WEBSEARCH_ENABLED_SEARCH_INTERFACES),
+                                                                        aas=1,
                                                                         cc=cc,
                                                                         jrec=jrec,
                                                                         ln=ln,
@@ -638,7 +638,7 @@ class Template(DefaultTemplate):
         header = _("Search %s records for:") % \
                  self.tmpl_nbrecs_info(record_count, "", "")
         asearchurl = self.build_search_interface_url(c=collection_id,
-                                                     aas=max(CFG_WEBSEARCH_ENABLED_SEARCH_INTERFACES),
+                                                     aas=1,
                                                      ln=ln)
         # print commentary start:
         out += '''
@@ -735,7 +735,7 @@ class Template(DefaultTemplate):
         header = _("Search %s records for") % \
                  self.tmpl_nbrecs_info(record_count, "", "")
         header += ':'
-        ssearchurl = self.build_search_interface_url(c=collection_id, aas=min(CFG_WEBSEARCH_ENABLED_SEARCH_INTERFACES), ln=ln)
+        ssearchurl = self.build_search_interface_url(c=collection_id, aas=0, ln=ln)
 
         out += '''
         <table class="searchbox advancedsearch">
@@ -1084,7 +1084,7 @@ class Template(DefaultTemplate):
         header = _("Search %s records for:") % \
                  self.tmpl_nbrecs_info(record_count, "", "")
         asearchurl = self.build_search_interface_url(c=collection_id,
-                                                     aas=max(CFG_WEBSEARCH_ENABLED_SEARCH_INTERFACES),
+                                                     aas=1,
                                                      ln=ln)
 
         # Build example of queries for this collection
