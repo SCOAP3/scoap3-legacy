@@ -27,8 +27,11 @@ def find_nations(field, subfields, record):
     for x in field:
         if x[0] in subfields:
             possible_affs = []
+
             def _sublistExists(list1, list2):
                 return ''.join(map(str, list2)) in ''.join(map(str, list1))
+            if "deceased" in x[1].lower():
+                continue
             values = set([y.lower().strip() for y in re.findall(ur"[\w']+", x[1].replace('.','').decode("UTF-8"), re.UNICODE)])
             record.warn(values)
             for key, val in NATIONS_DEFAULT_MAP.iteritems():
