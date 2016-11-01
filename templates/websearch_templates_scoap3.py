@@ -549,11 +549,10 @@ class Template(DefaultTemplate):
                    <!--
                    <th class="searchboxheader">
                     %(sort_by)s
-                   </th> -->
+                   </th>
                    <th class="searchboxheader">
                     %(display_res)s
                    </th>
-                   <!--
                    <th class="searchboxheader">
                     %(out_format)s
                    </th> -->
@@ -564,11 +563,10 @@ class Template(DefaultTemplate):
                    <!--
                    <td class="searchboxbody">
                      %(select_sf)s %(select_so)s %(select_rm)s
-                   </td> -->
+                   </td>
                    <td class="searchboxbody">
                      %(select_rg)s %(select_sc)s
                    </td>
-                   <!--
                    <td class="searchboxbody">%(select_of)s</td> -->
                   </tr>
                  </tbody>
