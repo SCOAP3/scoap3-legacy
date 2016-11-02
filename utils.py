@@ -114,7 +114,8 @@ NATIONS_DEFAULT_MAP["Norway"] = "Norway"
 NATIONS_DEFAULT_MAP["Oman"] = "Oman"
 NATIONS_DEFAULT_MAP["Pakistan"] = "Pakistan"
 NATIONS_DEFAULT_MAP["Panama"] = "Panama"
-NATIONS_DEFAULT_MAP["Philipines"] = "Philipines"
+NATIONS_DEFAULT_MAP["Palestine"] = "Palestine"
+NATIONS_DEFAULT_MAP["Philippines"] = "Philippines"
 NATIONS_DEFAULT_MAP["Poland"] = "Poland"
 NATIONS_DEFAULT_MAP["Portugalo"] = "Portugal"
 NATIONS_DEFAULT_MAP["Portugal"] = "Portugal"
@@ -182,6 +183,8 @@ NATIONS_DEFAULT_MAP['Belgrade'] = 'Serbia'
 NATIONS_DEFAULT_MAP['Istanbul'] = 'Turkey'
 NATIONS_DEFAULT_MAP['Ankara'] = 'Turkey'
 NATIONS_DEFAULT_MAP['Rome'] = 'Italy'
+NATIONS_DEFAULT_MAP['INFN'] = 'Italy'
+NATIONS_DEFAULT_MAP['Triumf'] = 'USA'
 
 
 #SCOAP3 related
