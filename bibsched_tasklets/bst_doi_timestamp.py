@@ -73,11 +73,11 @@ def bst_doi_timestamp(reset=0):
                     run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
             except URLError as e:
                 write_message("Problem with connection! %s" % (e,))
-                restart_on_error = True
+                # restart_on_error = True
             except socket.timeout as e:
                 write_message("Timeout error %s" % (e,))
                 write_message("Finishing and rescheduling")
-                restart_on_error = True
+                # restart_on_error = True
             except ValueError as e:
                 write_message("Value error in JSON string! %s" % (e,))
-                restart_on_error = True
+                # restart_on_error = True
