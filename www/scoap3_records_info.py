@@ -72,3 +72,71 @@ def index(req):
                                                         title,
                                                         authors,
                                                         publication_info))
+
+            
+def csu(req):
+    req.content_type = 'text/csv; charset=utf-8'
+    req.headers_out['content-disposition'] = ('attachment; filename=csu_records_info.csv')
+
+    search_patterns = ["California Polytechnic State University",
+                       "Carson",
+                       "Dominguez Hills",
+                       "Fresno",
+                       "California State University Fullerton",
+                       "California State University Long Beach",
+                       "California State University, Los Angeles",
+                       "Northridge",
+                       "California State University, Sacramento",
+                       "San Diego State University",
+                       "sfsu"]
+
+    def special_aff(author):
+        affs = []
+        au = ""
+        name = ""
+        for i in author:
+            if i[0] == 'v' and value in i[1]:
+                affs.append(i[1])
+            if i[0] == 'a':
+                name = i[1]
+        if len(affs) > 0:
+            au =  name + '('
+            for aff in affs:
+                au += aff + ', '
+            au += '), '
+        return au
+
+    req.write("SCOAP3 record id; Journal; Creation date; Modification date; Title; Authors; Publication info\n")
+    for value in search_patterns:
+        recids = perform_request_search(p="affiliation:'%s'" % (value,))
+        # req.write("%s; %s\n" % (value, len(recids) ))
+        for recid in recids:
+            rec = get_record(recid)
+            if '245' in rec:
+                title = rec['245'][0][0][0][1].strip()
+            else:
+                title = ""
+            creation_date = get_creation_date(recid)
+            modification_date = get_modification_date(recid)
+            authors = ""
+            if '100' in rec:
+                authors += special_aff(rec['100'][0][0])
+            if '700' in rec:
+                for author in rec['700']:
+                    authors += special_aff(author[0])
+            publication_info = ''
+            if '773' in rec:
+                for p in rec['773'][0][0]:
+                    if p[0] == 'p':
+                        publication_info = p[1]
+                publication_info += " %s" % (rec['024'][0][0][0][1],)
+            if '037' in rec:
+                publication_info += " %s" % (rec['037'][0][0][0][1],)
+
+            req.write("%s; %s; %s; %s; %s; %s; %s\n" % (recid,
+                                                        value,
+                                                        creation_date,
+                                                        modification_date,
+                                                        title,
+                                                        authors,
+                                                        publication_info)) 
