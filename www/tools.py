@@ -178,5 +178,5 @@ def get_collections_count(req, callback=''):
         a['journals'][key] = len(perform_request_search(c=key))
     a['other']['all'] = len(perform_request_search())
     a['other']['this_year'] = len(perform_request_search(p="year:%s" % (datetime.date.today().year,)))
-    a['other']['today'] = len(perform_request_search(p="datecreated:%s" % (datetime.date.today(),)))
+    a['other']['yesterday'] = len(perform_request_search(p="datecreated:%s" % (datetime.date.today() - datetime.timedelta(days=1),)))
     return '%s(%s)' % (callback, json.dumps(a))
