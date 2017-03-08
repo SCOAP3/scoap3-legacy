@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ##
 ## This file is part of Invenio.
-## Copyright (C) 2014 CERN.
+## Copyright (C) 2014, 2017 CERN.
 ##
 ## Invenio is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -46,6 +46,7 @@ def prepate_doi_table():
     run_sql("""CREATE TABLE IF NOT EXISTS doi (
         doi varchar(255) NOT NULL,
         creation_date datetime NOT NULL,
+        publication_date datetime DEFAULT NULL,
         PRIMARY KEY doi(doi),
         KEY (creation_date)
     ) ENGINE=MyISAM;""")
@@ -67,17 +68,42 @@ def bst_doi_timestamp(reset=0):
             try:
                 res = get_all_modified_dois(publisher, last_run, re_match, debug=True)
                 for doi in res:
-                    if run_sql("SELECT doi FROM doi WHERE doi=%s", (doi, )):
-                        continue
-                    write_message("New DOI discovered for publisher %s: %s" % (publisher, doi))
-                    run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
+                    if publisher == "10.1093":
+                        db_entry = run_sql("SELECT doi, publication_date FROM doi WHERE doi=%s", (doi, ))
+                        pub_date = None
+                        if 'published-online' in res[doi]:
+                            if len(res[doi]['published-online']['date-parts'][0]) == 3:
+                                pub_date = datetime.strptime('-'.join(map(str,res[doi]['published-online']['date-parts'][0])),"%Y-%m-%d")
+
+                        write_message(db_entry)
+                        if db_entry:
+                            if db_entry[0][1]:  # publication date is in the system
+                                continue
+                            else:
+                                if pub_date:
+                                    run_sql("UPDATE doi SET publication_date = %s WHERE doi=%s", (pub_date, doi))
+                                else:
+                                    continue
+                        else:
+                           write_message("New DOI discovered for publisher %s: %s, publication: %s" % (publisher, doi, pub_date))
+                           if pub_date:
+                                run_sql("INSERT INTO doi(doi, creation_date, publication_date) VALUES(%s, %s, %s)", (doi, now, pub_date))
+                           else:
+                                run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
+                    else:
+                        if run_sql("SELECT doi FROM doi WHERE doi=%s", (doi, )):
+                            continue
+                        write_message("New DOI discovered for publisher %s: %s" % (publisher, doi))
+                        run_sql("INSERT INTO doi(doi, creation_date) VALUES(%s, %s)", (doi, now))
             except URLError as e:
+                write_message("%s %s %s" % (publisher, last_run, re_match))
                 write_message("Problem with connection! %s" % (e,))
-                # restart_on_error = True
+                #restart_on_error = True
             except socket.timeout as e:
                 write_message("Timeout error %s" % (e,))
                 write_message("Finishing and rescheduling")
-                # restart_on_error = True
+                #restart_on_error = True
             except ValueError as e:
                 write_message("Value error in JSON string! %s" % (e,))
-                # restart_on_error = True
+                #restart_on_error = True
+
