@@ -242,7 +242,7 @@ def get_recid_list(req, collections='', from_date='', to_date='',
 
 
 def get_detiled_package_delivery(doi):
-    delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', doi.publication_date AS 'pub_date', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
+    delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', doi.publication_date AS 'pub_date', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi LEFT JOIN doi_package ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
     if delivery_data:
         first_del = delivery_data[0]['pkg_delivery']
         first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
@@ -279,7 +279,10 @@ def get_delivery_data(recid, doi):
 
     delivery_data = get_detiled_package_delivery(doi)
     if delivery_data:
-        return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4], delivery_data[5]
+        tmp = delivery_data[0]
+        if not tmp:
+            tmp = get_creation_date(recid)
+        return tmp, delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4], delivery_data[5]
     else:
         delivery_data = get_general_delivery(recid, doi)
         if delivery_data:
@@ -325,7 +328,7 @@ def get_record_checks(req, recids):
                 <td>%s</td>
                 <td %s>%s</td>
                 <td %s>%s</td>
-        <td>%s</td>
+                <td>%s</td>
                 <td %s>%s</td>
             </tr>""" % (join(CFG_SITE_URL, 'record', str(recid)), recid,
                         get_creation_date(recid),
@@ -547,19 +550,25 @@ def index(req):
 
 def get_delivery_of_firts_ab_package(data):
     delivery_date = None
-    for delivery in data:
-        if 'CERNAB' in delivery['pkg_name']:
-            delivery_date = delivery['pkg_delivery']
-            break
+    try:
+        for delivery in data:
+            if 'CERNAB' in delivery['pkg_name']:
+                delivery_date = delivery['pkg_delivery']
+                break
+    except:
+        pass
     return delivery_date
 
 
 def get_delivery_of_firts_pdfa(data):
     delivery_date = None
-    for delivery in data:
-        if 'vtex' in delivery['pkg_name']:
-            delivery_date = delivery['pkg_delivery']
-            break
+    try:
+        for delivery in data:
+            if 'vtex' in delivery['pkg_name']:
+                delivery_date = delivery['pkg_delivery']
+                break
+    except:
+        pass
     return delivery_date
 
 
@@ -612,6 +621,7 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
             last_mod = None
             doi_reg = None
             pdfa_del = None
+            pub_date = None
             first_del, first_ab_del, last_mod, doi_reg, pdfa_del, pub_date = get_delivery_data(recid, doi)
 
             record_compl = is_complete_record(recid)
