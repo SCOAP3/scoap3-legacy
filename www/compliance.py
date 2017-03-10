@@ -57,7 +57,7 @@ def get_compliance_values():
                 if field[0]:
                     str_val = field[0][0][1]
                     key = str_val[:str_val.find(':')].lower()
-                    val = int(str_val[str_val.find(':')+1:])
+                    val = int(str_val[str_val.find(':') + 1:])
                     tmpdic[key] = val
             compliance_check_values[recid] = tmpdic
 
@@ -242,14 +242,15 @@ def get_recid_list(req, collections='', from_date='', to_date='',
 
 
 def get_detiled_package_delivery(doi):
-    delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
+    delivery_data = run_sql("SELECT doi.creation_date AS 'doi_reg', doi.publication_date AS 'pub_date', package.name AS 'pkg_name', package.delivery_date AS 'pkg_delivery' FROM doi_package LEFT JOIN doi ON doi_package.doi=doi.doi LEFT JOIN package ON package.id=doi_package.package_id WHERE doi_package.doi=%s ORDER BY package.delivery_date ASC", (doi,), with_dict=True)
     if delivery_data:
         first_del = delivery_data[0]['pkg_delivery']
         first_ab_del = get_delivery_of_firts_ab_package(delivery_data)
         last_mod = delivery_data[-1]['pkg_delivery']
         doi_reg = delivery_data[0]['doi_reg']
         pdfa_del = get_delivery_of_firts_pdfa(delivery_data)
-        return (first_del, first_ab_del, last_mod, doi_reg, pdfa_del)
+        pub_date = delivery_data[0]['pub_date']
+        return (first_del, first_ab_del, last_mod, doi_reg, pdfa_del, pub_date)
     else:
         return None
 
@@ -262,7 +263,8 @@ def get_general_delivery(recid, doi):
         last_mod = get_modification_date(recid)
         doi_reg = delivery_data[0][1]
         pdfa_del = None
-        return (first_del, first_ab_del, last_mod, doi_reg, pdfa_del)
+        pub_date = delivery_data[0][2]
+        return (first_del, first_ab_del, last_mod, doi_reg, pdfa_del, pub_date)
     else:
         return None
 
@@ -273,16 +275,17 @@ def get_delivery_data(recid, doi):
     last_mod = None
     doi_reg = None
     pdfa_del = None
+    pub_date = None
 
     delivery_data = get_detiled_package_delivery(doi)
     if delivery_data:
-        return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4]
+        return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4], delivery_data[5]
     else:
         delivery_data = get_general_delivery(recid, doi)
         if delivery_data:
-            return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4]
+            return delivery_data[0], delivery_data[1], delivery_data[2], delivery_data[3], delivery_data[4], delivery_data[5]
 
-    return first_del, first_ab_del, last_mod, doi_reg, pdfa_del
+    return first_del, first_ab_del, last_mod, doi_reg, pdfa_del, pub_date
 
 
 def get_record_checks(req, recids):
@@ -297,7 +300,7 @@ def get_record_checks(req, recids):
             rec = get_record(recid)
             doi = get_doi(rec)
 
-            first_del, first_ab_del, last_mod, doi_reg, pdfa_del = get_delivery_data(recid, doi)
+            first_del, first_ab_del, last_mod, doi_reg, pdfa_del, pub_date = get_delivery_data(recid, doi)
 
             record_compl = is_complete_record(recid)
             return_val.append("""<tr>
@@ -322,6 +325,8 @@ def get_record_checks(req, recids):
                 <td>%s</td>
                 <td %s>%s</td>
                 <td %s>%s</td>
+        <td>%s</td>
+                <td %s>%s</td>
             </tr>""" % (join(CFG_SITE_URL, 'record', str(recid)), recid,
                         get_creation_date(recid),
                         get_modification_date(recid),
@@ -345,7 +350,10 @@ def get_record_checks(req, recids):
                         format_24h_delivery(check_24h_delivery(first_del, doi_reg)),
                         check_24h_delivery(first_del, doi_reg),
                         format_24h_delivery(check_24h_delivery(pdfa_del, doi_reg)),
-                        check_24h_delivery(pdfa_del, doi_reg)))
+                        check_24h_delivery(pdfa_del, doi_reg),
+                        str(pub_date),
+                        format_24h_delivery(check_24h_delivery(first_del, pub_date)),
+                        check_24h_delivery(first_del, pub_date)))
         except Exception:
             register_exception()
             recid = rid
@@ -373,6 +381,8 @@ def get_record_checks(req, recids):
                 <th>DOI registration</th>
                 <th>Delivery diff</th>
                 <th>PDF/A diff</th>
+        <th>Publication online</th>
+        <th>Pub. online diff</th>
             </tr>""")
     return ''.join(return_val)
 
@@ -557,7 +567,7 @@ def check_24h_delivery(time, doi_reg):
     if type(time) is str:
         time = datetime.strptime(time,'%Y-%m-%d')
     if time and doi_reg:
-        return time-doi_reg
+        return time - doi_reg
     else:
         return None
 
@@ -591,7 +601,8 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
                                 'First delivery', 'First AB delivery',
                                 'Last modification', 'PDF/A upload',
                                 'DOI registration', 'Delivery diff',
-                                'PDF/A diff']) + '\n'
+                                'PDF/A diff','Publication online',
+                                'Pub. online diff']) + '\n'
 
         for recid in papers:
             rec = get_record(recid)
@@ -601,7 +612,7 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
             last_mod = None
             doi_reg = None
             pdfa_del = None
-            first_del, first_ab_del, last_mod, doi_reg, pdfa_del = get_delivery_data(recid, doi)
+            first_del, first_ab_del, last_mod, doi_reg, pdfa_del, pub_date = get_delivery_data(recid, doi)
 
             record_compl = is_complete_record(recid)
             return_val += ';'.join(str(item) for item in [str(recid),
@@ -617,14 +628,16 @@ def write_csv(req, dictionary, journal_list, f_date, t_date,
                                    is_compliant(recid, 'cc').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'scoap3').lstrip('<b>').rstrip('</b>'),
                                    is_compliant(recid, 'category').lstrip('<b>').rstrip('</b>'),
-                                   str([rec_key for rec_key, rec_val in record_compl.iteritems() if not rec_val]),
+                                   str([rec_key for rec_key, rec_val in record_compl.iteritems() if not rec_val]).replace('\n',' ').replace(',',' '),
                                    str(first_del),
                                    str(first_ab_del),
                                    str(last_mod),
                                    str(pdfa_del),
                                    str(doi_reg),
                                    check_24h_delivery(first_del, doi_reg),
-                                   check_24h_delivery(pdfa_del, doi_reg)
+                                   check_24h_delivery(pdfa_del, doi_reg),
+                                   str(pub_date),
+                                   check_24h_delivery(first_del, pub_date),
                                    ])
             return_val += '\n'
 
