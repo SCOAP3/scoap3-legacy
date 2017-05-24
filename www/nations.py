@@ -676,7 +676,7 @@ def national_authors_list(req, search_country):
             else:
                 req.write(";;;;;;%s;%s;%s\n" % (author['name'], author['country'], author['affiliation']))
                 
-def institutions_list(req, country):
+def institutions_list(req, country, year=None):
     from copy import deepcopy
     def find_nations(affiliation):
         NATIONS_DEFAULT_MAP['European Organization for Nuclear Research'] = 'CERN'
@@ -731,8 +731,10 @@ def institutions_list(req, country):
                       'Nuclear Physics B':0,
                       'Physics letters B':0,
                       'PTEP':0}
-
-    recids = perform_request_search(p='country:"%s"' % (country,))
+    if(year):
+        recids = perform_request_search(p='country:"%s" year:%s' % (country,year))
+    else:
+      recids = perform_request_search(p='country:"%s"' % (country,))
 
     req.content_type = 'text/csv; charset=utf-8'
     req.headers_out['content-disposition'] = ('attachment; '
