@@ -454,6 +454,10 @@ class Template(DefaultTemplate):
             # display collections only if there is more than one
             selects = ''
             for sel in coll_selects:
+                # remove older than 2014 from search collections
+                for i, pair in enumerate(sel):
+                    if pair['value'] == "older_than_2014":
+                        del(sel[i])
                 selects += self.tmpl_select(fieldname='c', values=sel)
 
             out += """
