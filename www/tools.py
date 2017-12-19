@@ -169,6 +169,9 @@ def get_collections_count(req, callback=''):
                       'Journal of High Energy Physics':0,
                       'New Journal of Physics':0,
                       'Nuclear Physics B':0,
+                      'Physical Review C': 0,
+                      'Physical Review D': 0,
+                      'Physical Review Letters': 0,
                       'Physics Letters B':0,
                       'Progress of Theoretical and Experimental Physics':0
                       },
