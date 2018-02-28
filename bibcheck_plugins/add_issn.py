@@ -33,7 +33,10 @@ CFG_ISSN_MAP = {
     'JHEP': '1029-8479',
     'Nuclear Physics B': '0550-3213',
     'Physics letters B': '0370-2693',
-    'PTEP': '1347-4081'
+    'PTEP': '1347-4081',
+    'Phys. Rev. C':'2469-9993',
+    'Phys. Rev. D':'2470-0029',
+    'Phys. Rev. Lett.':'1079-7114',
 }
 
 def check_records(records, empty=False):
