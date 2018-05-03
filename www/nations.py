@@ -637,6 +637,8 @@ def national_authors_list(req, search_country):
         title = record_get_field_value(get_record(recid), '245', code="a")
         del_date = get_creation_date(recid)
         publisher = record_get_field_value(get_record(recid), '980', code="b")
+        if not publisher:
+            publisher = record_get_field_value(get_record(recid), '541', code="a")
         rec = get_record(recid)
 
         authors = []
