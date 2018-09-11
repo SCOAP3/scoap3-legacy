@@ -109,8 +109,12 @@ def check_records(records, empty=False):
             categories = _get_arxiv_category(arxiv_id)
             sleep(2)
             if categories:
-                val = string.format(int(any(filter(lambda x: 'hep' in x,
-                                                   categories))))
+                if 'hep' in categories[0]:
+                    string = 'Category:1'
+                else:
+                    string = 'Category:0'
+                #val = string.format(int(any(filter(lambda x: 'hep' in x,
+                #                                   categories))))
                 if _has_category_field(record):
                     position = _get_category_position(record)
                     record.amend_field(position, val, '')
