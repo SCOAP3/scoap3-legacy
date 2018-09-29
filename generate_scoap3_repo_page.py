@@ -47,7 +47,7 @@ def main():
             record = get_record(recid)
             title = remove_html_markup(record_get_field_value(record, '245', code='a'), remove_escaped_chars_p=False).strip()
             doi = record_get_field_value(record, '024', '7', code='a')
-            print '<li><a href="http://dx.doi.org/%s" target="_blank">%s</a>: %s</li>' % (escape(doi, True), escape(doi), title)
+            print '<li><a href="https://doi.org/%s" target="_blank">%s</a>: %s</li>' % (escape(doi, True), escape(doi), title)
         print "</ul></p>"
 
 if __name__ == "__main__":

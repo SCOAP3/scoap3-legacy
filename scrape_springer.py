@@ -34,5 +34,5 @@ for article in articles:
     href = article.get('href')
     doi = href.replace("/article/", "").encode('utf8')
     title = article.getText(' ', True).strip().encode('utf8')
-    print '<li><a href="http://dx.doi.org/%s" target="_blank">%s</a>: %s</li>' % (escape(doi, True), escape(doi), title)
+    print '<li><a href="https://doi.org/%s" target="_blank">%s</a>: %s</li>' % (escape(doi, True), escape(doi), title)
 print "</ul></p>"

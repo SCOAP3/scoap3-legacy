@@ -194,7 +194,7 @@ def late(req):
     th = ("<tr><th>DOI</th><th>Title</th><th>DOI registration</th>"
           "<th>Arrival in SCOAP3</th></tr>")
     tr = ("<tr style='background-color: {0};'><td>"
-          "<a href='http://dx.doi.org/{1}' target='_blank'>{2}</td>"
+          "<a href='https://doi.org/{1}' target='_blank'>{2}</td>"
           "<td>{3}</td><td>{4}</td><td>{5}</td></tr>")
 
     sql_bibrec = "SELECT creation_date FROM bibrec WHERE id=%s"
@@ -265,9 +265,9 @@ def articles(req, i, mode='html'):
             title = record_get_field_value(record, '245', code='a')
             doi = record_get_field_value(record, '024', '7', code='a')
             if mode == 'text':
-                print >> req, "http://dx.doi.org/%s" % doi
+                print >> req, "https://doi.org/%s" % doi
 
-            li = ("<li><a href='http://dx.doi.org/{0}' "
+            li = ("<li><a href='https://doi.org/{0}' "
                   "target='_blank'>{1}</a>: {2}</li>")
             ret.append(li.format(escape(doi, True), escape(doi), title))
         ret.append("</ul></p>")
