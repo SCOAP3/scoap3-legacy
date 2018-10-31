@@ -39,6 +39,11 @@ def _get_arxiv_category(id):
 
     if data:
         xml = parseString(data)
+        for tag in xml.getElementsByTagName('arxiv:primary_category'):
+            try:
+                result.append(tag.attributes['term'].value)
+            except KeyError:
+                pass
         for tag in xml.getElementsByTagName('category'):
             try:
                 result.append(tag.attributes['term'].value)
