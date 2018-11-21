@@ -634,6 +634,8 @@ def national_authors_list(req, search_country):
     req.write("#;RECID;Title;Creation date;Publisher;Total # of authors;Authors name(given country only);Authors country;Authors affiliations\n")
 
     for number, recid in enumerate(ids):
+        doi = record_get_field_value(get_record(recid), '024', ind1="7", code="a")
+        journal = record_get_field_value(get_record(recid), '773', code="p")
         title = record_get_field_value(get_record(recid), '245', code="a")
         del_date = get_creation_date(recid)
         publisher = record_get_field_value(get_record(recid), '980', code="b")
@@ -674,9 +676,9 @@ def national_authors_list(req, search_country):
 
         for i, author in enumerate(authors):
             if i == 0:
-                req.write("%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (number+1, recid, title.replace('\n',''), del_date, publisher, author_count, author['name'], author['country'], author['affiliation']))
+                req.write("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n" % (number+1, recid, title.replace('\n',''), del_date, publisher, author_count, author['name'], author['country'], author['affiliation']))
             else:
-                req.write(";;;;;;%s;%s;%s\n" % (author['name'], author['country'], author['affiliation']))
+                req.write("||||||||%s|%s|%s\n" % (author['name'], author['country'], author['affiliation']))
                 
 def institutions_list(req, country, year=None):
     from copy import deepcopy
