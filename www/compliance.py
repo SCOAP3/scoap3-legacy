@@ -44,30 +44,25 @@ JOURNALS_NO_PDFA = {'IOP/CPC': 'Chinese Physics C',
                     'IOP/NJP': 'New Journal of Physics'}
 JOURNALS_NO_XML = {'JAG/ACTA': 'Acta'}
 
-compliance_check_values = {}
 
-
-def get_compliance_values():
-    reclist = get_collection_reclist('SCOAP3 Repository')
-    for recid in reclist:
-        tmpdic = {}
-        rec = get_record(recid)
-        if '591' in rec:
-            for field in rec['591']:
-                if field[0]:
-                    str_val = field[0][0][1]
-                    key = str_val[:str_val.find(':')].lower()
-                    val = int(str_val[str_val.find(':') + 1:])
-                    tmpdic[key] = val
-            compliance_check_values[recid] = tmpdic
-
-
-get_compliance_values()
+def get_compliance_value(recid):
+    tmpdic = {}
+    rec = get_record(recid)
+    if '591' in rec:
+        for field in rec['591']:
+            if field[0]:
+                str_val = field[0][0][1]
+                key = str_val[:str_val.find(':')].lower()
+                val = int(str_val[str_val.find(':') + 1:])
+                tmpdic[key] = val
+        return tmpdic
+    return tmpdic
 
 
 def is_compliant(recid, non_compliance_checks_key):
     try:
-        if compliance_check_values[recid][non_compliance_checks_key]:
+        comp = get_compliance_value(recid)
+        if comp[non_compliance_checks_key]:
             return "YES"
         else:
             return "<b>NO</b>"
