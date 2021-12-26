@@ -305,7 +305,7 @@ def get_record_checks(req, recids):
                 <td><a href="%s">%i</a></td>
                 <td>%s</td>
                 <td>%s</td>
-                <td><a href="http://dx.doi.org/%s">%s</a></td>
+                <td><a href="https://doi.org/%s">%s</a></td>
                 <td>%s</td>
                 <td>%s</td>
                 <td>%s</td>
